@@ -1,10 +1,11 @@
-import productRouter from './product.js';
+const UserRouter = require('../router/UserRouter');
 
 const routes = (app) => {
-  app.use('/product', productRouter);
-  app.use('/', (req, res) => {
-    res.send('home page');
+  app.use('/api/user', UserRouter);
+
+  app.get('/', (req, res) => {
+    res.json({ name: 'Hi LofA' });
   });
 };
 
-export default routes;
+module.exports = routes;

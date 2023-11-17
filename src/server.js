@@ -1,22 +1,22 @@
-import cors from 'cors';
-import dotenv from 'dotenv';
-import express from 'express';
-import mongoose from 'mongoose';
-import router from './router/index.js';
-
-const app = express();
-
-app.use(cors());
+const cors = require('cors');
+const dotenv = require('dotenv');
+const express = require('express');
+const mongoose = require('mongoose');
+const router = require('./router');
+const bodyParser = require('body-parser');
 
 dotenv.config();
+const app = express();
 const PORT = process.env.PORT;
+const MONGODB_URL = process.env.MONGODB_URL;
+
+app.use(cors());
+app.use(bodyParser.json());
 
 mongoose
-  .connect(
-    'mongodb+srv://lofa:200288Lofa@cluster0.lbrd8xz.mongodb.net/?retryWrites=true&w=majority'
-  )
+  .connect(MONGODB_URL)
   .then(() => {
-    console.log('Đã kết nối đến database thành công');
+    console.log('Connected');
     router(app);
     app.listen(PORT, () => {
       console.log(`Server running at http://localhost:${PORT}`);
