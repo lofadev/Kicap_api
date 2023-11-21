@@ -1,4 +1,4 @@
-const UserRouter = require('../router/UserRouter');
+import UserRouter from '../router/UserRouter.js';
 
 const routes = (app) => {
   app.use('/api/user', UserRouter);
@@ -8,4 +8,4 @@ const routes = (app) => {
   });
 };
 
-module.exports = routes;
+export default routes;

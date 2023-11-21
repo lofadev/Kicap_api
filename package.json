@@ -4,6 +4,7 @@
   "author": {
     "name": "LofA"
   },
+  "type": "module",
   "main": "src/server.js",
   "license": "MIT",
   "scripts": {
