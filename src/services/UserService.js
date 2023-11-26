@@ -132,17 +132,6 @@ const getAllUser = () => {
   });
 };
 
-const getUser = () => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const users = await User.find({});
-      resolve(users);
-    } catch (error) {
-      reject(error);
-    }
-  });
-};
-
 const getDetailsUser = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
