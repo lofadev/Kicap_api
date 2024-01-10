@@ -30,6 +30,17 @@ const createSlider = async (req, res) => {
   }
 };
 
+const getSlider = async (req, res) => {
+  try {
+    const response = await SliderService.getSlider();
+    return res.status(200).json(response);
+  } catch (error) {
+    return res.status(400).json({
+      message: error,
+    });
+  }
+};
+
 const updateSlider = async (req, res) => {
   try {
     const image = req.file;
@@ -86,6 +97,7 @@ const deleteSlider = async (req, res) => {
 
 const SliderController = {
   createSlider,
+  getSlider,
   updateSlider,
   deleteSlider,
 };

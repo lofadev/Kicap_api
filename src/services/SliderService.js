@@ -1,9 +1,9 @@
 import {
+  deleteObject,
   getDownloadURL,
   getStorage,
   ref,
   uploadBytesResumable,
-  deleteObject,
 } from 'firebase/storage';
 
 import Slider from '../models/SliderModel.js';
@@ -23,11 +23,11 @@ const createSlider = (newSLider) => {
       const slider = await Slider.create({
         image: downloadURL,
         url: url,
-        file_name: fileName,
+        file_name: fileName.split('/')[1],
       });
       resolve({
         status: 'OK',
-        message: 'Thêm mới Slide thành công.',
+        message: 'Thêm mới Slider thành công.',
         data: slider,
       });
     } catch (error) {
@@ -35,6 +35,22 @@ const createSlider = (newSLider) => {
     }
   });
 };
+
+const getSlider = () => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const sliders = await Slider.find({});
+      resolve({
+        status: 'OK',
+        message: 'Danh sách Slider.',
+        data: sliders,
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
 const updateSlider = (id, data) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -45,19 +61,13 @@ const updateSlider = (id, data) => {
           message: 'Slider này không tồn tại.',
         });
       }
-      const { image, url } = data;
+      const { image } = data;
       const fileName = `images/${Date.now() + '_' + image.originalname}`;
       const storage = getStorage();
 
       // remove image from firebase
       const desertRef = ref(storage, checkSlider.file_name);
-      deleteObject(desertRef)
-        .then(() => {
-          console.log('Đã xóa ở firebase thành công.');
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+      await deleteObject(desertRef);
 
       // add new image to firebase
       const storageRef = ref(storage, fileName);
@@ -71,7 +81,7 @@ const updateSlider = (id, data) => {
       const newSlider = await Slider.findByIdAndUpdate(id, data, { new: true });
       resolve({
         status: 'OK',
-        message: 'Cập nhật Slide thành công.',
+        message: 'Cập nhật Slider thành công.',
         data: newSlider,
       });
     } catch (error) {
@@ -82,26 +92,22 @@ const updateSlider = (id, data) => {
 const deleteSlider = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const checkSlider = await Slider.findOne({ _id: id });
+      const checkSlider = await Slider.findByIdAndDelete({ _id: id });
+
       if (!checkSlider) {
         return resolve({
           status: 'ERROR',
           message: 'Slider này không tồn tại.',
         });
       }
+
       const storage = getStorage();
-      const desertRef = ref(storage, checkSlider.file_name);
-      deleteObject(desertRef)
-        .then(() => {
-          console.log('Đã xóa ở firebase thành công.');
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-      await Slider.findByIdAndDelete(id);
+      const desertRef = ref(storage, `images/${checkSlider.file_name}`);
+      await deleteObject(desertRef);
+
       resolve({
         status: 'OK',
-        message: 'Đã xóa Slide thành công.',
+        message: 'Đã xóa Slider thành công.',
       });
     } catch (error) {
       reject(error);
@@ -111,6 +117,7 @@ const deleteSlider = (id) => {
 
 const SliderService = {
   createSlider,
+  getSlider,
   updateSlider,
   deleteSlider,
 };
