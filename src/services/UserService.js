@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import User from '../models/UserModel.js';
-import { generalAccessToken, generalRefreshToken } from '../utils/index.js';
+import { generateAccessToken, generateRefreshToken } from '../utils/index.js';
 
 const createUser = (newUser) => {
   return new Promise(async (resolve, reject) => {
@@ -99,12 +99,12 @@ const loginUser = (payload) => {
           message: 'Mật khẩu không chính xác.',
         });
       }
-      const access_token = generalAccessToken({
+      const access_token = generateAccessToken({
         id: checkUser._id,
         isAdmin: checkUser.isAdmin,
       });
 
-      const refresh_token = generalRefreshToken({
+      const refresh_token = generateRefreshToken({
         id: checkUser._id,
         isAdmin: checkUser.isAdmin,
       });

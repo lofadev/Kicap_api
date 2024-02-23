@@ -13,12 +13,12 @@ const isVietNamPhoneNumber = (phone) => {
   return vietnamesePhoneNumberRegex.test(phone);
 };
 
-const generalAccessToken = (payload) => {
+const generateAccessToken = (payload) => {
   const access_token = jwt.sign(payload, process.env.ACCESS_TOKEN, { expiresIn: '1d' });
   return access_token;
 };
 
-const generalRefreshToken = (payload) => {
+const generateRefreshToken = (payload) => {
   const refresh_token = jwt.sign(payload, process.env.REFRESH_TOKEN, { expiresIn: '365d' });
   return refresh_token;
 };
@@ -39,7 +39,7 @@ const refreshTokenService = (token) => {
             message: 'Not permission',
           });
         }
-        const access_token = generalAccessToken({
+        const access_token = generateAccessToken({
           id: user?._id,
           isAdmin: user?.isAdmin,
         });
@@ -58,8 +58,8 @@ const refreshTokenService = (token) => {
 export {
   isEmail,
   isVietNamPhoneNumber,
-  generalAccessToken,
-  generalRefreshToken,
+  generateAccessToken,
+  generateRefreshToken,
   isTokenExpired,
   refreshTokenService,
 };
