@@ -3,23 +3,26 @@ import { isEmail, isVietNamPhoneNumber, refreshTokenService } from '../utils/ind
 
 const createUser = async (req, res) => {
   try {
-    const { firstName, lastName, phone, email, password, confirmPassword } = req.body;
-    if (!firstName || !lastName || !phone || !email || !password || !confirmPassword) {
+    const { name, phone, email, password, confirmPassword } = req.body;
+    if (!name || !phone || !email || !password || !confirmPassword) {
       return res.status(200).json({
         status: 'ERROR',
         message: 'Không được bỏ trống.',
       });
-    } else if (!isEmail(email)) {
+    }
+    if (!isEmail(email)) {
       return res.status(200).json({
         status: 'ERROR',
         message: 'Email sai định dạng.',
       });
-    } else if (password !== confirmPassword) {
+    }
+    if (password !== confirmPassword) {
       return res.status(200).json({
         status: 'ERROR',
         message: 'Mật khẩu không trùng khớp.',
       });
-    } else if (!isVietNamPhoneNumber(phone)) {
+    }
+    if (!isVietNamPhoneNumber(phone)) {
       return res.status(200).json({
         status: 'ERROR',
         message: 'Số điện thoại này phải thuộc vùng Việt Nam.',
@@ -29,6 +32,7 @@ const createUser = async (req, res) => {
     return res.status(200).json(response);
   } catch (error) {
     return res.status(404).json({
+      status: 'ERROR',
       message: error,
     });
   }
@@ -36,7 +40,6 @@ const createUser = async (req, res) => {
 
 const updateUser = async (req, res) => {
   try {
-    const { isAdmin, ...data } = req.body;
     const userId = req.params.id;
     if (!userId) {
       return res.status(200).json({
@@ -44,28 +47,23 @@ const updateUser = async (req, res) => {
         message: 'UserID param là bắt buộc.',
       });
     }
-    const { first_name, last_name, phone, email, password } = data;
-    if (first_name === '' || last_name === '' || phone === '' || email === '' || password == '') {
-      return res.status(200).json({
-        status: 'ERROR',
-        message: 'Không được bỏ trống.',
-      });
-    }
     let response;
     if (res.isAdmin) {
       response = await UserService.updateUser(userId, req.body);
     } else {
+      const { isAdmin, ...newPayload } = req.body;
       if (isAdmin) {
-        return res.status(200).json({
+        return res.status(400).json({
           status: 'ERROR',
           message: 'Not permission',
         });
       }
-      response = await UserService.updateUser(userId, data);
+      response = await UserService.updateUser(userId, newPayload);
     }
     return res.status(200).json(response);
   } catch (error) {
     return res.status(404).json({
+      status: 'ERROR',
       message: error,
     });
   }
@@ -84,6 +82,7 @@ const deleteUser = async (req, res) => {
     return res.status(200).json({ response });
   } catch (error) {
     return res.status(404).json({
+      status: 'ERROR',
       message: error,
     });
   }
@@ -97,23 +96,25 @@ const loginUser = async (req, res) => {
         status: 'ERROR',
         message: 'Không được bỏ trống.',
       });
-    } else if (!isEmail(email)) {
+    }
+    if (!isEmail(email)) {
       return res.status(200).json({
         status: 'ERROR',
         message: 'Email sai định dạng',
       });
     }
     const response = await UserService.loginUser(req.body);
-    const { refresh_token } = response;
+    const { refresh_token, ...newResponse } = response;
     res.cookie('refresh_token', refresh_token, {
       httpOnly: true,
       secure: false,
       sameSite: 'strict',
       path: '/',
     });
-    return res.status(200).json(response);
+    return res.status(200).json(newResponse);
   } catch (error) {
     return res.status(404).json({
+      status: 'ERROR',
       message: error,
     });
   }
@@ -129,6 +130,7 @@ const getAllUser = async (req, res) => {
     });
   } catch (error) {
     return res.status(404).json({
+      status: 'ERROR',
       message: error,
     });
   }
@@ -147,6 +149,7 @@ const getDetailsUser = async (req, res) => {
     return res.status(200).json(response);
   } catch (error) {
     return res.status(404).json({
+      status: 'ERROR',
       message: error,
     });
   }
@@ -165,6 +168,7 @@ const refreshToken = async (req, res) => {
     return res.status(200).json(response);
   } catch (error) {
     return res.status(404).json({
+      status: 'ERROR',
       message: error,
     });
   }
@@ -179,6 +183,7 @@ const logoutUser = async (req, res) => {
     });
   } catch (error) {
     return res.status(404).json({
+      status: 'ERROR',
       message: error,
     });
   }
