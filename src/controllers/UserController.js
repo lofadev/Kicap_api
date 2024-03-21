@@ -10,17 +10,20 @@ const createUser = async (req, res) => {
         status: 'ERROR',
         message: 'Không được bỏ trống.',
       });
-    } else if (!isEmail(email)) {
+    }
+    if (!isEmail(email)) {
       return res.status(200).json({
         status: 'ERROR',
         message: 'Email sai định dạng.',
       });
-    } else if (password !== confirmPassword) {
+    }
+    if (password !== confirmPassword) {
       return res.status(200).json({
         status: 'ERROR',
         message: 'Mật khẩu không trùng khớp.',
       });
-    } else if (!isVietNamPhoneNumber(phone)) {
+    }
+    if (!isVietNamPhoneNumber(phone)) {
       return res.status(200).json({
         status: 'ERROR',
         message: 'Số điện thoại này phải thuộc vùng Việt Nam.',
@@ -37,19 +40,11 @@ const createUser = async (req, res) => {
 
 const updateUser = async (req, res) => {
   try {
-    const { isAdmin, ...data } = req.body;
     const userId = req.params.id;
     if (!userId) {
       return res.status(200).json({
         status: 'ERROR',
         message: 'UserID param là bắt buộc.',
-      });
-    }
-    const { first_name, last_name, phone, email, password } = data;
-    if (first_name === '' || last_name === '' || phone === '' || email === '' || password == '') {
-      return res.status(200).json({
-        status: 'ERROR',
-        message: 'Không được bỏ trống.',
       });
     }
     let response;

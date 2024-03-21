@@ -14,6 +14,7 @@ const createUser = (newUser) => {
         });
       }
       const hash = bcrypt.hashSync(password, 10);
+      console.log(hash);
       const createdUser = await User.create({
         name,
         email,
@@ -33,20 +34,18 @@ const createUser = (newUser) => {
   });
 };
 
-const updateUser = (id, data) => {
+const updateUser = (id, payload) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const checkUser = await User.findOne({ _id: id });
-      if (!checkUser) {
+      const user = await User.findOne({ _id: id });
+      if (!user) {
         return resolve({
           status: 'ERROR',
           message: 'User này không tồn tại.',
         });
       }
-      const { password } = data;
-      const hash = bcrypt.hashSync(password, 10);
-      data.password = hash;
-      const updatedUser = await User.findByIdAndUpdate(id, data, { new: true });
+      if (payload.password) payload.password = bcrypt.hashSync(password, 10);
+      const updatedUser = await User.findByIdAndUpdate(id, payload, { new: true });
       resolve({
         status: 'OK',
         message: 'Cập nhật thông tin thành công.',
@@ -61,8 +60,8 @@ const updateUser = (id, data) => {
 const deleteUser = (userId) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const checkUser = await User.findOne({ _id: userId });
-      if (!checkUser) {
+      const user = await User.findOne({ _id: userId });
+      if (!user) {
         return resolve({
           status: 'ERROR',
           message: 'User này không tồn tại.',
@@ -83,15 +82,15 @@ const loginUser = (payload) => {
   return new Promise(async (resolve, reject) => {
     const { email, password } = payload;
     try {
-      const checkUser = await User.findOne({ email: email });
-      if (!checkUser) {
+      const user = await User.findOne({ email });
+      if (!user) {
         resolve({
           status: 'ERROR',
           message: 'Tài Khoản này không tồn tại.',
         });
       }
-      const comparePassword = bcrypt.compareSync(password, checkUser.password);
 
+      const comparePassword = bcrypt.compareSync(password, user.password);
       if (!comparePassword) {
         resolve({
           status: 'ERROR',
@@ -99,13 +98,13 @@ const loginUser = (payload) => {
         });
       }
       const access_token = generateAccessToken({
-        id: checkUser._id,
-        isAdmin: checkUser.isAdmin,
+        id: user._id,
+        isAdmin: user.isAdmin,
       });
 
       const refresh_token = generateRefreshToken({
-        id: checkUser._id,
-        isAdmin: checkUser.isAdmin,
+        id: user._id,
+        isAdmin: user.isAdmin,
       });
 
       resolve({
