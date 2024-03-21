@@ -3,12 +3,12 @@ import mongoose from 'mongoose';
 const UserSchema = new mongoose.Schema(
   {
     name: { type: String },
+    avatar: { type: String },
     email: { type: String, required: true, unique: true },
-    phone: { type: String },
+    phone: { type: String, unique: true },
     password: { type: String, required: true },
     address: { type: String },
     isAdmin: { type: Boolean, default: false, required: true },
-    avatar: { type: String },
     province: { type: String },
   },
   { timestamps: true }

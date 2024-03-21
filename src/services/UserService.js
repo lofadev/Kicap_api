@@ -6,7 +6,6 @@ const createUser = (newUser) => {
   return new Promise(async (resolve, reject) => {
     try {
       const { name, phone, email, password } = newUser;
-      console.log(newUser);
       const checkUser = await User.findOne({ email });
       if (checkUser) {
         return resolve({
@@ -25,7 +24,7 @@ const createUser = (newUser) => {
       if (createdUser) {
         resolve({
           status: 'OK',
-          message: 'SUCCESS',
+          message: 'Đăng ký thành công.',
           data: createdUser,
         });
       }
@@ -49,7 +48,7 @@ const updateUser = (id, payload) => {
       const updatedUser = await User.findByIdAndUpdate(id, payload, { new: true });
       resolve({
         status: 'OK',
-        message: 'SUCCESS',
+        message: 'Cập nhật thông tin thành công.',
         data: updatedUser,
       });
     } catch (error) {
@@ -111,8 +110,10 @@ const loginUser = (payload) => {
       resolve({
         status: 'OK',
         message: 'Đăng nhập thành công.',
-        access_token,
-        refresh_token,
+        data: {
+          access_token,
+          refresh_token,
+        },
       });
     } catch (error) {
       reject(error);
@@ -134,9 +135,7 @@ const getAllUser = () => {
 const getDetailsUser = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const user = await User.findOne({
-        _id: id,
-      });
+      const user = await User.findById(id);
       if (!user) {
         resolve({
           status: 'ERROR',

@@ -1,45 +1,35 @@
-import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import jwt from 'jsonwebtoken';
+import variable from '../variable.js';
+import { getToken } from '../utils/index.js';
 dotenv.config();
 
 const authMiddleWare = (req, res, next) => {
-  const token = req.headers.token;
+  const token = getToken(req);
   jwt.verify(token, process.env.ACCESS_TOKEN, function (err, user) {
     if (err) {
-      return res.status(404).json({
-        status: 'ERROR',
-        message: 'Not permission',
-      });
+      return res.status(403).json(variable.NOT_PERMISSION);
     }
     if (user?.isAdmin) {
       next();
     } else {
-      return res.status(404).json({
-        status: 'ERROR',
-        message: 'Not permission',
-      });
+      return res.status(403).json(variable.NOT_PERMISSION);
     }
   });
 };
 
 const authUserMiddleWare = (req, res, next) => {
-  const token = req.headers.token;
+  const token = getToken(req);
   const userId = req.params.id;
   jwt.verify(token, process.env.ACCESS_TOKEN, function (err, user) {
     if (err) {
-      return res.status(404).json({
-        status: 'ERROR',
-        message: 'Not permission',
-      });
+      return res.status(403).json(variable.NOT_PERMISSION);
     }
     if (user?.isAdmin || user?.id === userId) {
       res.isAdmin = user.isAdmin;
       next();
     } else {
-      return res.status(404).json({
-        status: 'ERROR',
-        message: 'Not permission',
-      });
+      return res.status(403).json(variable.NOT_PERMISSION);
     }
   });
 };
