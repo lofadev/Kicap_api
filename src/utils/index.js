@@ -1,6 +1,5 @@
 import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
-dotenv.config();
+import variable from '../variable.js';
 
 const isEmail = (email) => {
   const regex =
@@ -14,12 +13,12 @@ const isVietNamPhoneNumber = (phone) => {
 };
 
 const generateAccessToken = (payload) => {
-  const access_token = jwt.sign(payload, process.env.ACCESS_TOKEN, { expiresIn: '1d' });
+  const access_token = jwt.sign(payload, process.env.ACCESS_TOKEN, { expiresIn: '30s' });
   return access_token;
 };
 
 const generateRefreshToken = (payload) => {
-  const refresh_token = jwt.sign(payload, process.env.REFRESH_TOKEN, { expiresIn: '365d' });
+  const refresh_token = jwt.sign(payload, process.env.REFRESH_TOKEN, { expiresIn: '7d' });
   return refresh_token;
 };
 
@@ -34,10 +33,7 @@ const refreshTokenService = (token) => {
     try {
       jwt.verify(token, process.env.REFRESH_TOKEN, (err, user) => {
         if (err) {
-          return resolve({
-            status: 'ERROR',
-            message: 'Not permission',
-          });
+          return resolve(variable.NOT_PERMISSION);
         }
         const access_token = generateAccessToken({
           id: user?._id,
@@ -55,6 +51,8 @@ const refreshTokenService = (token) => {
   });
 };
 
+const getToken = (req) => req.headers.authorization.split(' ')[1];
+
 export {
   isEmail,
   isVietNamPhoneNumber,
@@ -62,4 +60,5 @@ export {
   generateRefreshToken,
   isTokenExpired,
   refreshTokenService,
+  getToken,
 };

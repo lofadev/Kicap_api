@@ -4,6 +4,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import router from './routes/index.js';
 import bodyParser from 'body-parser';
+import cookieParser from 'cookie-parser';
 
 const PORT = process.env.PORT;
 const MONGODB_URL = process.env.MONGODB_URL;
@@ -12,6 +13,7 @@ const app = express();
 dotenv.config();
 app.use(cors());
 app.use(bodyParser.json());
+app.use(cookieParser());
 
 mongoose
   .connect(MONGODB_URL)

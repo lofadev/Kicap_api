@@ -54,8 +54,8 @@ const getSlider = () => {
 const updateSlider = (id, data) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const checkSlider = await Slider.findOne({ _id: id });
-      if (!checkSlider) {
+      const slider = await Slider.findOne({ _id: id });
+      if (!slider) {
         return resolve({
           status: 'ERROR',
           message: 'Slider này không tồn tại.',
@@ -66,7 +66,7 @@ const updateSlider = (id, data) => {
       const storage = getStorage();
 
       // remove image from firebase
-      const desertRef = ref(storage, checkSlider.file_name);
+      const desertRef = ref(storage, slider.file_name);
       await deleteObject(desertRef);
 
       // add new image to firebase
@@ -92,9 +92,9 @@ const updateSlider = (id, data) => {
 const deleteSlider = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const checkSlider = await Slider.findByIdAndDelete({ _id: id });
+      const slider = await Slider.findByIdAndDelete({ _id: id });
 
-      if (!checkSlider) {
+      if (!slider) {
         return resolve({
           status: 'ERROR',
           message: 'Slider này không tồn tại.',
@@ -102,7 +102,7 @@ const deleteSlider = (id) => {
       }
 
       const storage = getStorage();
-      const desertRef = ref(storage, `images/${checkSlider.file_name}`);
+      const desertRef = ref(storage, `images/${slider.file_name}`);
       await deleteObject(desertRef);
 
       resolve({
