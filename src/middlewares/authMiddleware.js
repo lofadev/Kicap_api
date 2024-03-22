@@ -8,6 +8,7 @@ const authMiddleWare = (req, res, next) => {
   const token = getToken(req);
   jwt.verify(token, process.env.ACCESS_TOKEN, function (err, user) {
     if (err) {
+      console.log(err);
       return res.status(403).json(variable.NOT_PERMISSION);
     }
     if (user?.isAdmin) {
