@@ -18,7 +18,7 @@ const generateAccessToken = (payload) => {
 };
 
 const generateRefreshToken = (payload) => {
-  const refresh_token = jwt.sign(payload, process.env.REFRESH_TOKEN, { expiresIn: '7d' });
+  const refresh_token = jwt.sign(payload, process.env.REFRESH_TOKEN, { expiresIn: '2d' });
   return refresh_token;
 };
 
@@ -51,7 +51,7 @@ const refreshTokenService = (token) => {
   });
 };
 
-const getToken = (req) => req.headers.authorization.split(' ')[1];
+const getToken = (req) => req.headers.authorization?.split(' ')[1];
 
 export {
   isEmail,
