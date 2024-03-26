@@ -11,6 +11,14 @@ const variable = {
     status: 'ERROR',
     message: 'ID param là bắt buộc.',
   },
+  ID_NOTVALID: {
+    status: 'ERROR',
+    message: 'ID không hợp lệ.',
+  },
+  NO_DATA_CHANGE: {
+    status: 'ERROR',
+    message: 'Dữ liệu không có gì thay đổi.',
+  },
 };
 
 export default variable;

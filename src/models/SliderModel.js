@@ -4,7 +4,7 @@ const SliderSchema = new mongoose.Schema(
   {
     image: { type: String, required: true },
     url: { type: String, default: '' },
-    file_name: { type: String },
+    fileName: { type: String },
   },
   { timestamps: true }
 );

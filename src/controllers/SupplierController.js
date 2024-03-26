@@ -1,13 +1,13 @@
-import ShipperService from '../services/ShipperService.js';
+import SupplierService from '../services/SupplierService.js';
 import variable from '../variable.js';
 
-const createShipper = async (req, res) => {
+const createSupplier = async (req, res) => {
   try {
-    const { name, phone } = req.body;
-    if (!name || !phone) {
+    const { name, contactName, province, address, phone, email } = req.body;
+    if (!name || !contactName || !province || !address || !phone || !email) {
       return res.status(400).json(variable.NOT_EMPTY);
     }
-    const response = await ShipperService.createShipper(req.body);
+    const response = await SupplierService.createSupplier(req.body);
     return res.status(200).json(response);
   } catch (error) {
     return res.status(400).json({
@@ -16,10 +16,10 @@ const createShipper = async (req, res) => {
   }
 };
 
-const getShippers = async (req, res) => {
+const getSuppliers = async (req, res) => {
   try {
     const { page, limit, search } = req.query;
-    const response = await ShipperService.getShippers(
+    const response = await SupplierService.getSuppliers(
       Number(page || 1),
       Number(limit || 10),
       search
@@ -32,13 +32,13 @@ const getShippers = async (req, res) => {
   }
 };
 
-const getShipper = async (req, res) => {
+const getSupplier = async (req, res) => {
   try {
     const id = req.params.id;
     if (!id) {
-      res.status.json(variable.REQUIRE_ID);
+      res.status.json(variable.NOT_EMPTY);
     }
-    const response = await ShipperService.getShipper(id);
+    const response = await SupplierService.getSupplier(id);
     return res.status(200).json(response);
   } catch (error) {
     return res.status(400).json({
@@ -47,21 +47,20 @@ const getShipper = async (req, res) => {
   }
 };
 
-const updateShipper = async (req, res) => {
+const updateSupplier = async (req, res) => {
   try {
     const id = req.params.id;
-    const { name, phone } = req.body;
-    console.log(req.body);
+    const { name, contactName, province, address, phone, email } = req.body;
     if (!id) {
       return res.status(400).json({
         status: 'ERROR',
         message: 'ID param là bắt buộc.',
       });
     }
-    if (!name && !phone) {
-      return res.status(400).json(variable.NOT_EMPTY);
+    if (!name && !contactName && !province && !address && !phone && !email) {
+      return res.status(400).json(variable.NO_DATA_CHANGE);
     }
-    const response = await ShipperService.updateShipper(id, req.body);
+    const response = await SupplierService.updateSupplier(id, req.body);
     return res.status(200).json(response);
   } catch (error) {
     return res.status(400).json({
@@ -70,11 +69,10 @@ const updateShipper = async (req, res) => {
   }
 };
 
-const deleteShipper = async (req, res) => {
+const deleteSupplier = async (req, res) => {
   try {
     const id = req.params.id;
-    if (!id) return res.status(400).json(variable.REQUIRE_ID);
-    const response = await ShipperService.deleteShipper(id);
+    const response = await SupplierService.deleteSupplier(id);
     return res.status(200).json(response);
   } catch (error) {
     return res.status(400).json({
@@ -83,11 +81,11 @@ const deleteShipper = async (req, res) => {
   }
 };
 
-const ShipperController = {
-  createShipper,
-  getShippers,
-  getShipper,
-  updateShipper,
-  deleteShipper,
+const SupplierController = {
+  createSupplier,
+  getSuppliers,
+  getSupplier,
+  updateSupplier,
+  deleteSupplier,
 };
-export default ShipperController;
+export default SupplierController;

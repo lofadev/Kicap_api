@@ -10,7 +10,7 @@ initializeApp(firebaseConfig);
 
 const upload = multer({ storage: multer.memoryStorage() });
 router.post('/create', authMiddleWare, upload.single('image'), SliderController.createSlider);
-router.get('/getAll', authMiddleWare, SliderController.getSlider);
+router.get('/get-all', authMiddleWare, SliderController.getSlider);
 router.put('/update/:id', authMiddleWare, upload.single('image'), SliderController.updateSlider);
 router.delete('/delete/:id', authMiddleWare, SliderController.deleteSlider);
 

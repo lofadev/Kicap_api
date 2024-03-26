@@ -13,12 +13,12 @@ const isVietNamPhoneNumber = (phone) => {
 };
 
 const generateAccessToken = (payload) => {
-  const access_token = jwt.sign(payload, process.env.ACCESS_TOKEN, { expiresIn: '30s' });
+  const access_token = jwt.sign(payload, process.env.ACCESS_TOKEN, { expiresIn: '60s' });
   return access_token;
 };
 
 const generateRefreshToken = (payload) => {
-  const refresh_token = jwt.sign(payload, process.env.REFRESH_TOKEN, { expiresIn: '2d' });
+  const refresh_token = jwt.sign(payload, process.env.REFRESH_TOKEN, { expiresIn: '1d' });
   return refresh_token;
 };
 

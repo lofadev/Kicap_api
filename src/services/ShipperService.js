@@ -4,12 +4,11 @@ const createShipper = (newShipper) => {
   return new Promise(async (resolve, reject) => {
     try {
       const { name, phone } = newShipper;
-      const shipper = await Shipper.find({ phone });
+      const shipper = await Shipper.findOne({ phone });
       if (shipper) {
         resolve({
           status: 'ERROR',
           message: 'Số điện thoại này đã tồn tại.',
-          data: shipperCreated,
         });
       }
       const shipperCreated = await Shipper.create({ name, phone });
@@ -58,16 +57,16 @@ const getShipper = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
       const shipper = await Shipper.findById(id);
-      if (shipper) {
-        return resolve({
-          status: 'OK',
-          message: 'Lấy shipper thành công.',
-          data: shipper,
+      if (!shipper) {
+        resolve({
+          status: 'ERROR',
+          message: 'Shipper ID Không hợp lệ.',
         });
       }
       resolve({
-        status: 'ERROR',
-        message: 'Shipper ID Không hợp lệ.',
+        status: 'OK',
+        message: 'Lấy shipper thành công.',
+        data: shipper,
       });
     } catch (error) {
       reject(error);
