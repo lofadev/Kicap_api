@@ -97,12 +97,12 @@ const loginUser = (payload) => {
           message: 'Mật khẩu không chính xác.',
         });
       }
-      const access_token = generateAccessToken({
+      const accessToken = generateAccessToken({
         id: user._id,
         isAdmin: user.isAdmin,
       });
 
-      const refresh_token = generateRefreshToken({
+      const refreshToken = generateRefreshToken({
         id: user._id,
         isAdmin: user.isAdmin,
       });
@@ -111,8 +111,8 @@ const loginUser = (payload) => {
         status: 'OK',
         message: 'Đăng nhập thành công.',
         data: {
-          access_token,
-          refresh_token,
+          accessToken,
+          refreshToken,
         },
       });
     } catch (error) {

@@ -8,9 +8,10 @@ const createSupplier = async (req, res) => {
       return res.status(400).json(variable.NOT_EMPTY);
     }
     const response = await SupplierService.createSupplier(req.body);
-    return res.status(200).json(response);
+    return res.status(response.status === 'OK' ? 200 : 400).json(response);
   } catch (error) {
     return res.status(400).json({
+      status: 'ERROR',
       message: error,
     });
   }
@@ -27,6 +28,7 @@ const getSuppliers = async (req, res) => {
     return res.status(200).json(response);
   } catch (error) {
     return res.status(400).json({
+      status: 'ERROR',
       message: error,
     });
   }
@@ -39,9 +41,10 @@ const getSupplier = async (req, res) => {
       res.status.json(variable.NOT_EMPTY);
     }
     const response = await SupplierService.getSupplier(id);
-    return res.status(200).json(response);
+    return res.status(response.status === 'OK' ? 200 : 400).json(response);
   } catch (error) {
     return res.status(400).json({
+      status: 'ERROR',
       message: error,
     });
   }
@@ -49,23 +52,13 @@ const getSupplier = async (req, res) => {
 
 const updateSupplier = async (req, res) => {
   try {
-    const id = req.params.id;
+    const { id } = req.params;
     const { name, contactName, province, address, phone, email } = req.body;
-    if (!id) {
-      return res.status(400).json({
-        status: 'ERROR',
-        message: 'ID param là bắt buộc.',
-      });
-    }
-    if (!name && !contactName && !province && !address && !phone && !email) {
-      return res.status(400).json(variable.NO_DATA_CHANGE);
-    }
+
     const response = await SupplierService.updateSupplier(id, req.body);
-    return res.status(200).json(response);
+    return res.status(response.status === 'OK' ? 200 : 400).json(response);
   } catch (error) {
-    return res.status(400).json({
-      message: error,
-    });
+    return res.status(400).json({ status: 'ERROR', message: error });
   }
 };
 
@@ -73,9 +66,10 @@ const deleteSupplier = async (req, res) => {
   try {
     const id = req.params.id;
     const response = await SupplierService.deleteSupplier(id);
-    return res.status(200).json(response);
+    return res.status(response.status === 'OK' ? 200 : 400).json(response);
   } catch (error) {
     return res.status(400).json({
+      status: 'ERROR',
       message: error,
     });
   }
