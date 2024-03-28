@@ -13,13 +13,14 @@ const isVietNamPhoneNumber = (phone) => {
 };
 
 const generateAccessToken = (payload) => {
-  const access_token = jwt.sign(payload, process.env.ACCESS_TOKEN, { expiresIn: '60s' });
-  return access_token;
+  const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN, { expiresIn: '60s' });
+  return accessToken;
 };
 
 const generateRefreshToken = (payload) => {
-  const refresh_token = jwt.sign(payload, process.env.REFRESH_TOKEN, { expiresIn: '1d' });
-  return refresh_token;
+  const refreshToken = jwt.sign(payload, process.env.REFRESH_TOKEN, { expiresIn: '1d' });
+  return refreshToken;
+
 };
 
 const isTokenExpired = (token) => {
@@ -33,16 +34,16 @@ const refreshTokenService = (token) => {
     try {
       jwt.verify(token, process.env.REFRESH_TOKEN, (err, user) => {
         if (err) {
-          return resolve(variable.NOT_PERMISSION);
+          resolve(variable.NOT_PERMISSION);
         }
-        const access_token = generateAccessToken({
+        const accessToken = generateAccessToken({
           id: user?._id,
           isAdmin: user?.isAdmin,
         });
         resolve({
           status: 'OK',
           message: 'SUCCESS',
-          access_token,
+          accessToken,
         });
       });
     } catch (error) {
