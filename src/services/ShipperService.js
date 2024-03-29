@@ -27,17 +27,13 @@ const getShippers = (page, limit, search) => {
   return new Promise(async (resolve, reject) => {
     try {
       const skip = (page - 1) * limit;
-      let shippers, totalPage;
-      let totalShippers = await Shipper.count();
+      let query = {};
       if (search) {
-        shippers = await Shipper.find({ name: { $regex: search, $options: 'i' } })
-          .skip(skip)
-          .limit(limit);
-        totalShippers = shippers.length;
-      } else {
-        shippers = await Shipper.find().skip(skip).limit(limit);
+        query = { name: { $regex: search, $options: 'i' } };
       }
-      totalPage = Math.ceil(totalShippers / limit);
+      const totalShippers = await Shipper.count();
+      const shippers = await Shipper.find(query).skip(skip).limit(limit);
+      const totalPage = Math.ceil(totalShippers / limit);
       resolve({
         status: 'OK',
         message: 'Lấy danh sách shippers.',
@@ -79,7 +75,7 @@ const updateShipper = (id, data) => {
     try {
       const shipper = await Shipper.findById(id);
       if (!shipper) {
-        return resolve({
+        resolve({
           status: 'ERROR',
           message: 'Shipper này không tồn tại.',
         });
@@ -101,7 +97,7 @@ const deleteShipper = (id) => {
     try {
       const shipper = await Shipper.findByIdAndDelete(id);
       if (!shipper) {
-        return resolve({
+        resolve({
           status: 'ERROR',
           message: 'Shipper này không tồn tại.',
         });

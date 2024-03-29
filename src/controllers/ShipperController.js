@@ -51,7 +51,6 @@ const updateShipper = async (req, res) => {
   try {
     const id = req.params.id;
     const { name, phone } = req.body;
-    console.log(req.body);
     if (!id) {
       return res.status(400).json({
         status: 'ERROR',

@@ -43,16 +43,11 @@ const getSuppliers = (page, limit, search) => {
   return new Promise(async (resolve, reject) => {
     try {
       const skip = (page - 1) * limit;
-      let suppliers, totalPage, totalSuppliers;
-      if (search) {
-        suppliers = await Supplier.find({ name: { $regex: search, $options: 'i' } })
-          .skip(skip)
-          .limit(limit);
-      } else {
-        suppliers = await Supplier.find().skip(skip).limit(limit);
-      }
-      totalSuppliers = suppliers.length;
-      totalPage = Math.ceil(totalSuppliers / limit);
+      let query;
+      if (search) query = { name: { $regex: search, $options: 'i' } };
+      const totalSuppliers = await Supplier.count();
+      const suppliers = await Supplier.find(query).skip(skip).limit(limit);
+      const totalPage = Math.ceil(totalSuppliers / limit);
       resolve({
         status: 'OK',
         message: 'Lấy danh sách nhà cung cấp.',

@@ -56,7 +56,7 @@ const updateSlider = (id, data) => {
     try {
       const slider = await Slider.findOne({ _id: id });
       if (!slider) {
-        return resolve({
+        resolve({
           status: 'ERROR',
           message: 'Slider này không tồn tại.',
         });
@@ -95,7 +95,7 @@ const deleteSlider = (id) => {
       const slider = await Slider.findByIdAndDelete({ _id: id });
 
       if (!slider) {
-        return resolve({
+        resolve({
           status: 'ERROR',
           message: 'Slider này không tồn tại.',
         });
