@@ -6,24 +6,21 @@ import router from './routes/index.js';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 
-const PORT = process.env.PORT;
-const MONGODB_URL = process.env.MONGODB_URL;
+dotenv.config();
+const port = process.env.PORT;
+const mongodbUrl = process.env.MONGODB_URL;
 const app = express();
 
-dotenv.config();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(cookieParser());
 
-mongoose
-  .connect(MONGODB_URL)
-  .then(() => {
-    console.log('Connected');
-    router(app);
-    app.listen(PORT, () => {
-      console.log(`Server running at http://localhost:${PORT}`);
-    });
-  })
-  .catch((error) => {
-    console.log(error);
+try {
+  await mongoose.connect(mongodbUrl);
+  router(app);
+  app.listen(port, () => {
+    console.log(`Server running at http://localhost:${port}`);
   });
+} catch (error) {
+  console.log(error);
+}

@@ -8,13 +8,12 @@ const createUser = (newUser) => {
       const { name, phone, email, password } = newUser;
       const checkUser = await User.findOne({ email });
       if (checkUser) {
-        return resolve({
+        resolve({
           status: 'ERROR',
           message: 'Email này đã tồn tại.',
         });
       }
       const hash = bcrypt.hashSync(password, 10);
-      console.log(hash);
       const createdUser = await User.create({
         name,
         email,
@@ -39,7 +38,7 @@ const updateUser = (id, payload) => {
     try {
       const user = await User.findOne({ _id: id });
       if (!user) {
-        return resolve({
+        resolve({
           status: 'ERROR',
           message: 'User này không tồn tại.',
         });
@@ -62,7 +61,7 @@ const deleteUser = (userId) => {
     try {
       const user = await User.findOne({ _id: userId });
       if (!user) {
-        return resolve({
+        resolve({
           status: 'ERROR',
           message: 'User này không tồn tại.',
         });

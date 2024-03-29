@@ -1,8 +1,6 @@
-import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 import variable from '../variable.js';
 import { getToken } from '../utils/index.js';
-dotenv.config();
 
 const authMiddleWare = (req, res, next) => {
   const token = getToken(req);
