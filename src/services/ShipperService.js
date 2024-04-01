@@ -31,7 +31,7 @@ const getShippers = (page, limit, search) => {
       if (search) {
         query = { name: { $regex: search, $options: 'i' } };
       }
-      const totalShippers = await Shipper.count();
+      const totalShippers = await Shipper.countDocuments(query);
       const shippers = await Shipper.find(query).skip(skip).limit(limit);
       const totalPage = Math.ceil(totalShippers / limit);
       resolve({

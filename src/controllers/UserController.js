@@ -41,12 +41,7 @@ const createUser = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const userId = req.params.id;
-    if (!userId) {
-      return res.status(200).json({
-        status: 'ERROR',
-        message: 'UserID param là bắt buộc.',
-      });
-    }
+    const { isAdmin } = req.body;
     let response;
     if (res.isAdmin) {
       response = await UserService.updateUser(userId, req.body);
@@ -56,6 +51,7 @@ const updateUser = async (req, res) => {
     }
     return res.status(200).json(response);
   } catch (error) {
+    console.log(error);
     return res.status(400).json({
       message: error,
     });
@@ -65,14 +61,8 @@ const updateUser = async (req, res) => {
 const deleteUser = async (req, res) => {
   try {
     const userId = req.params.id;
-    if (!userId) {
-      return res.status(200).json({
-        status: 'ERROR',
-        message: 'UserID param là bắt buộc.',
-      });
-    }
     const response = await UserService.deleteUser(userId);
-    return res.status(200).json({ response });
+    return res.status(200).json(response);
   } catch (error) {
     return res.status(400).json({
       message: error,
@@ -106,12 +96,9 @@ const loginUser = async (req, res) => {
 
 const getAllUser = async (req, res) => {
   try {
-    const response = await UserService.getAllUser();
-    return res.status(200).json({
-      status: 'OK',
-      message: 'Lấy tất cả user có trong database.',
-      data: response,
-    });
+    const { page, limit, search } = req.query;
+    const response = await UserService.getAllUser(Number(page || 1), Number(limit || 10), search);
+    return res.status(200).json(response);
   } catch (error) {
     return res.status(400).json({
       message: error,
@@ -147,7 +134,7 @@ const refreshToken = async (req, res) => {
       });
     }
     const response = await refreshTokenService(token);
-    return res.status(200).json(response);
+    return res.status(response.status === 'OK' ? 200 : 400).json(response);
   } catch (error) {
     return res.status(400).json({
       message: error,

@@ -20,7 +20,6 @@ const generateAccessToken = (payload) => {
 const generateRefreshToken = (payload) => {
   const refreshToken = jwt.sign(payload, process.env.REFRESH_TOKEN, { expiresIn: '1d' });
   return refreshToken;
-
 };
 
 const isTokenExpired = (token) => {
@@ -34,7 +33,7 @@ const refreshTokenService = (token) => {
     try {
       jwt.verify(token, process.env.REFRESH_TOKEN, (err, user) => {
         if (err) {
-          resolve(variable.NOT_PERMISSION);
+          resolve(variable.HAS_ERROR);
         }
         const accessToken = generateAccessToken({
           id: user?._id,
@@ -42,7 +41,7 @@ const refreshTokenService = (token) => {
         });
         resolve({
           status: 'OK',
-          message: 'SUCCESS',
+          message: 'Lấy lại accessToken thành công',
           accessToken,
         });
       });

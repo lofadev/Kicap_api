@@ -1,7 +1,11 @@
 const variable = {
   NOT_PERMISSION: {
     status: 'ERROR',
-    message: 'Not permission',
+    message: 'Không có quyền truy cập.',
+  },
+  HAS_ERROR: {
+    status: 'ERROR',
+    message: 'Có lỗi!',
   },
   NOT_EMPTY: {
     status: 'ERROR',

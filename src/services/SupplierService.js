@@ -45,7 +45,7 @@ const getSuppliers = (page, limit, search) => {
       const skip = (page - 1) * limit;
       let query;
       if (search) query = { name: { $regex: search, $options: 'i' } };
-      const totalSuppliers = await Supplier.count();
+      const totalSuppliers = await Supplier.countDocuments(query);
       const suppliers = await Supplier.find(query).skip(skip).limit(limit);
       const totalPage = Math.ceil(totalSuppliers / limit);
       resolve({
