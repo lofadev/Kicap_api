@@ -36,14 +36,14 @@ const createUser = (newUser) => {
 const updateUser = (id, payload) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const user = await User.findOne({ _id: id });
+      const user = await User.findById(id);
       if (!user) {
         resolve({
           status: 'ERROR',
           message: 'User này không tồn tại.',
         });
       }
-      if (payload.password) payload.password = bcrypt.hashSync(password, 10);
+      if (payload.password) payload.password = bcrypt.hashSync(payload.password, 10);
       const updatedUser = await User.findByIdAndUpdate(id, payload, { new: true });
       resolve({
         status: 'OK',
@@ -59,14 +59,13 @@ const updateUser = (id, payload) => {
 const deleteUser = (userId) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const user = await User.findOne({ _id: userId });
+      const user = await User.findByIdAndDelete(userId);
       if (!user) {
         resolve({
           status: 'ERROR',
           message: 'User này không tồn tại.',
         });
       }
-      await User.findByIdAndDelete(userId);
       resolve({
         status: 'OK',
         message: 'Xóa tài khoản thành công.',
@@ -120,11 +119,24 @@ const loginUser = (payload) => {
   });
 };
 
-const getAllUser = () => {
+const getAllUser = (page, limit, search) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const users = await User.find({});
-      resolve(users);
+      const skip = (page - 1) * limit;
+      let query;
+      if (search) query = { name: { $regex: search, $options: 'i' } };
+      const totalUsers = await User.countDocuments(query);
+      const users = await User.find(query).skip(skip).limit(limit);
+      const totalPage = Math.ceil(totalUsers / limit);
+      resolve({
+        status: 'OK',
+        message: 'Lấy danh sách user.',
+        data: users,
+        currentPage: page,
+        totalUsers,
+        totalPage,
+        limit,
+      });
     } catch (error) {
       reject(error);
     }

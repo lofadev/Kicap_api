@@ -18,7 +18,7 @@ const createShipper = async (req, res) => {
 
 const getShippers = async (req, res) => {
   try {
-    const { page, limit, search } = req.query;
+    let { page, limit, search } = req.query;
     const response = await ShipperService.getShippers(
       Number(page || 1),
       Number(limit || 10),
