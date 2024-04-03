@@ -5,15 +5,15 @@ import {
   ref,
   uploadBytesResumable,
 } from 'firebase/storage';
-
 import Slider from '../models/SliderModel.js';
+import { getApp } from 'firebase/app';
 
-const createSlider = (newSLider) => {
+const createSlider = (image) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const { image, url } = newSLider;
-      const fileName = `images/${Date.now() + '_' + image.originalname}`;
-      const storage = getStorage();
+      const fileName = `images/${Date.now()}`;
+      const firebaseApp = getApp();
+      const storage = getStorage(firebaseApp, process.env.FIREBASE_STORAGEBUCKET);
       const storageRef = ref(storage, fileName);
       const metadata = {
         contentType: image.mimetype,
@@ -22,12 +22,11 @@ const createSlider = (newSLider) => {
       const downloadURL = await getDownloadURL(snapshot.ref);
       const slider = await Slider.create({
         image: downloadURL,
-        url: url,
-        file_name: fileName.split('/')[1],
+        fileName: fileName.split('/')[1],
       });
       resolve({
         status: 'OK',
-        message: 'Thêm mới Slider thành công.',
+        message: 'Thêm mới slider thành công.',
         data: slider,
       });
     } catch (error) {
@@ -36,14 +35,25 @@ const createSlider = (newSLider) => {
   });
 };
 
-const getSlider = () => {
+const getSliders = (page, limit, search) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const sliders = await Slider.find({});
+      const skip = (page - 1) * limit;
+      let query = {};
+      if (search) {
+        query = { name: { $regex: search, $options: 'i' } };
+      }
+      const totalSliders = await Slider.countDocuments(query);
+      const sliders = await Slider.find(query).skip(skip).limit(limit);
+      const totalPage = Math.ceil(totalSliders / limit);
       resolve({
         status: 'OK',
-        message: 'Danh sách Slider.',
+        message: 'Lấy danh sách sliders.',
         data: sliders,
+        currentPage: page,
+        totalSliders,
+        totalPage,
+        limit,
       });
     } catch (error) {
       reject(error);
@@ -51,22 +61,22 @@ const getSlider = () => {
   });
 };
 
-const updateSlider = (id, data) => {
+const updateSlider = (id, image) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const slider = await Slider.findOne({ _id: id });
+      const slider = await Slider.findById(id);
       if (!slider) {
         resolve({
           status: 'ERROR',
           message: 'Slider này không tồn tại.',
         });
       }
-      const { image } = data;
-      const fileName = `images/${Date.now() + '_' + image.originalname}`;
-      const storage = getStorage();
+      const fileName = `images/${Date.now()}`;
+      const firebaseApp = getApp();
+      const storage = getStorage(firebaseApp, process.env.FIREBASE_STORAGEBUCKET);
 
       // remove image from firebase
-      const desertRef = ref(storage, slider.file_name);
+      const desertRef = ref(storage, slider.fileName);
       await deleteObject(desertRef);
 
       // add new image to firebase
@@ -77,8 +87,7 @@ const updateSlider = (id, data) => {
       const snapshot = await uploadBytesResumable(storageRef, image.buffer, metadata);
       const downloadURL = await getDownloadURL(snapshot.ref);
 
-      data.image = downloadURL;
-      const newSlider = await Slider.findByIdAndUpdate(id, data, { new: true });
+      const newSlider = await Slider.findByIdAndUpdate(id, { image: downloadURL }, { new: true });
       resolve({
         status: 'OK',
         message: 'Cập nhật Slider thành công.',
@@ -92,7 +101,7 @@ const updateSlider = (id, data) => {
 const deleteSlider = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const slider = await Slider.findByIdAndDelete({ _id: id });
+      const slider = await Slider.findByIdAndDelete(id);
 
       if (!slider) {
         resolve({
@@ -117,7 +126,7 @@ const deleteSlider = (id) => {
 
 const SliderService = {
   createSlider,
-  getSlider,
+  getSliders,
   updateSlider,
   deleteSlider,
 };

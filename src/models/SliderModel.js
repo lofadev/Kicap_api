@@ -3,8 +3,8 @@ import mongoose from 'mongoose';
 const SliderSchema = new mongoose.Schema(
   {
     image: { type: String, required: true },
-    url: { type: String, default: '' },
     fileName: { type: String },
+    displayOrder: { type: Number },
   },
   { timestamps: true }
 );
