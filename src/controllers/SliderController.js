@@ -3,7 +3,6 @@ import SliderService from '../services/SliderService.js';
 const createSlider = async (req, res) => {
   try {
     const image = req.file;
-    const { url } = req.body;
     if (!image) {
       return res.status(400).json({
         status: 'ERROR',
@@ -20,8 +19,7 @@ const createSlider = async (req, res) => {
         message: 'File ảnh không được lớn hơn 5MB.',
       });
     }
-    const data = { image, url };
-    const response = await SliderService.createSlider(data);
+    const response = await SliderService.createSlider(image);
     return res.status(200).json(response);
   } catch (error) {
     return res.status(400).json({
@@ -30,9 +28,9 @@ const createSlider = async (req, res) => {
   }
 };
 
-const getSlider = async (req, res) => {
+const getSliders = async (req, res) => {
   try {
-    const response = await SliderService.getSlider();
+    const response = await SliderService.getSliders();
     return res.status(200).json(response);
   } catch (error) {
     return res.status(400).json({
@@ -44,14 +42,8 @@ const getSlider = async (req, res) => {
 const updateSlider = async (req, res) => {
   try {
     const image = req.file;
-    const { url } = req.body;
     const id = req.params.id;
-    if (!id) {
-      return res.status(400).json({
-        status: 'ERROR',
-        message: 'ID param là bắt buộc.',
-      });
-    } else if (!image) {
+    if (!image) {
       return res.status(400).json({
         status: 'ERROR',
         message: 'Image là bắt buộc.',
@@ -67,8 +59,7 @@ const updateSlider = async (req, res) => {
         message: 'File ảnh không được lớn hơn 5MB.',
       });
     }
-    const data = { image, url };
-    const response = await SliderService.updateSlider(id, data);
+    const response = await SliderService.updateSlider(id, image);
     return res.status(200).json(response);
   } catch (error) {
     return res.status(400).json({
@@ -97,7 +88,7 @@ const deleteSlider = async (req, res) => {
 
 const SliderController = {
   createSlider,
-  getSlider,
+  getSliders,
   updateSlider,
   deleteSlider,
 };
