@@ -1,5 +1,13 @@
 import jwt from 'jsonwebtoken';
 import variable from '../variable.js';
+import {
+  deleteObject,
+  getDownloadURL,
+  getStorage,
+  ref,
+  uploadBytesResumable,
+} from 'firebase/storage';
+import { getApp } from 'firebase/app';
 
 const isEmail = (email) => {
   const regex =
@@ -53,6 +61,60 @@ const refreshTokenService = (token) => {
 
 const getToken = (req) => req.headers.authorization?.split(' ')[1];
 
+function pad(num, size) {
+  let s = num + '';
+  while (s.length < size) s = '0' + s;
+  return s;
+}
+
+const generateSKU = (count) => {
+  count++;
+  return 'SKU' + pad(count, 3);
+};
+
+async function uploadImageToFirebase(image) {
+  try {
+    const fileName = `images/${Date.now()}`;
+    const firebaseApp = getApp();
+    const storage = getStorage(firebaseApp, process.env.FIREBASE_STORAGEBUCKET);
+    const storageRef = ref(storage, fileName);
+    const metadata = {
+      contentType: image.mimetype,
+    };
+    const snapshot = await uploadBytesResumable(storageRef, image.buffer, metadata);
+    const downloadURL = await getDownloadURL(snapshot.ref);
+    return downloadURL;
+  } catch (error) {
+    console.error('Error uploading image to Firebase:', error);
+    throw error;
+  }
+}
+
+async function uploadMultipleImagesToFirebase(images) {
+  try {
+    const uploadPromises = images.map((image) => uploadImageToFirebase(image));
+    const uploadResults = await Promise.all(uploadPromises);
+    return uploadResults;
+  } catch (error) {
+    console.error('Error uploading images to Firebase:', error);
+    throw error;
+  }
+}
+
+async function deleteImageFromFirebase(fileName) {
+  try {
+    const firebaseApp = getApp();
+    const storage = getStorage(firebaseApp, process.env.FIREBASE_STORAGEBUCKET);
+
+    // remove image from firebase
+    const desertRef = ref(storage, fileName);
+    await deleteObject(desertRef);
+  } catch (error) {
+    console.error('Error uploading image to Firebase:', error);
+    throw error;
+  }
+}
+
 export {
   isEmail,
   isVietNamPhoneNumber,
@@ -61,4 +123,8 @@ export {
   isTokenExpired,
   refreshTokenService,
   getToken,
+  generateSKU,
+  uploadImageToFirebase,
+  deleteImageFromFirebase,
+  uploadMultipleImagesToFirebase,
 };

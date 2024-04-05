@@ -1,13 +1,14 @@
-import SupplierService from '../services/SupplierService.js';
+import AttributeService from '../services/AttributeService.js';
+
 import variable from '../variable.js';
 
-const createSupplier = async (req, res) => {
+const createAttribute = async (req, res) => {
   try {
-    const { name, contactName, province, address, phone, email } = req.body;
-    if (!name || !contactName || !province || !address || !phone || !email) {
+    const { name, displayOrder } = req.body;
+    if (!name || !displayOrder) {
       return res.status(400).json(variable.NOT_EMPTY);
     }
-    const response = await SupplierService.createSupplier(req.body);
+    const response = await AttributeService.createAttribute(req.body);
     return res.status(response.status === 'OK' ? 200 : 400).json(response);
   } catch (error) {
     return res.status(400).json({
@@ -17,10 +18,10 @@ const createSupplier = async (req, res) => {
   }
 };
 
-const getSuppliers = async (req, res) => {
+const getAttributes = async (req, res) => {
   try {
     const { page, limit, search } = req.query;
-    const response = await SupplierService.getSuppliers(
+    const response = await AttributeService.getAttributes(
       Number(page || 1),
       Number(limit || 10),
       search
@@ -34,13 +35,10 @@ const getSuppliers = async (req, res) => {
   }
 };
 
-const getSupplier = async (req, res) => {
+const getAttribute = async (req, res) => {
   try {
     const id = req.params.id;
-    if (!id) {
-      res.status.json(variable.NOT_EMPTY);
-    }
-    const response = await SupplierService.getSupplier(id);
+    const response = await AttributeService.getAttribute(id);
     return res.status(response.status === 'OK' ? 200 : 400).json(response);
   } catch (error) {
     return res.status(400).json({
@@ -50,20 +48,10 @@ const getSupplier = async (req, res) => {
   }
 };
 
-const updateSupplier = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const response = await SupplierService.updateSupplier(id, req.body);
-    return res.status(response.status === 'OK' ? 200 : 400).json(response);
-  } catch (error) {
-    return res.status(400).json({ status: 'ERROR', message: error });
-  }
-};
-
-const deleteSupplier = async (req, res) => {
+const updateAttribute = async (req, res) => {
   try {
     const id = req.params.id;
-    const response = await SupplierService.deleteSupplier(id);
+    const response = await AttributeService.updateAttribute(id, req.body);
     return res.status(response.status === 'OK' ? 200 : 400).json(response);
   } catch (error) {
     return res.status(400).json({
@@ -73,11 +61,24 @@ const deleteSupplier = async (req, res) => {
   }
 };
 
-const SupplierController = {
-  createSupplier,
-  getSuppliers,
-  getSupplier,
-  updateSupplier,
-  deleteSupplier,
+const deleteAttribute = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const response = await AttributeService.deleteAttribute(id);
+    return res.status(response.status === 'OK' ? 200 : 400).json(response);
+  } catch (error) {
+    return res.status(400).json({
+      status: 'ERROR',
+      message: error,
+    });
+  }
 };
-export default SupplierController;
+
+const AttributeController = {
+  createAttribute,
+  getAttributes,
+  getAttribute,
+  updateAttribute,
+  deleteAttribute,
+};
+export default AttributeController;

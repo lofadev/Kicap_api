@@ -10,7 +10,7 @@ const UserSchema = new mongoose.Schema(
     isAdmin: { type: Boolean, default: false, required: true },
     address: { type: String, default: '' },
     province: { type: String, default: '' },
-    isLocked: { type: Boolean, default: false },
+    isLocked: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
