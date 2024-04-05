@@ -6,7 +6,10 @@ const authMiddleWare = (req, res, next) => {
   const token = getToken(req);
   jwt.verify(token, process.env.ACCESS_TOKEN, function (err, user) {
     if (err) {
-      return res.status(403).json(variable.NOT_PERMISSION);
+      if (err.name === 'TokenExpiredError') {
+        return res.status(401).json(variable.TOKEN_EXPIRED);
+      }
+      return res.status(400).json(variable.HAS_ERROR);
     }
     if (user?.isAdmin) {
       next();

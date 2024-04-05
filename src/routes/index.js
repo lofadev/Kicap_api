@@ -5,6 +5,7 @@ import ShipperRouter from '../routes/ShipperRouter.js';
 import SupplierRouter from '../routes/SupplierRouter.js';
 import ProvinceRouter from '../routes/ProvinceRouter.js';
 import CategoryRouter from '../routes/CategoryRouter.js';
+import AttributeRouter from '../routes/AttributeRouter.js';
 
 const routes = (app) => {
   app.use('/api/user', UserRouter);
@@ -14,6 +15,7 @@ const routes = (app) => {
   app.use('/api/supplier', SupplierRouter);
   app.use('/api/province', ProvinceRouter);
   app.use('/api/category', CategoryRouter);
+  app.use('/api/attribute', AttributeRouter);
 
   app.get('/', (req, res) => {
     res.json({ name: 'Hi LofA' });

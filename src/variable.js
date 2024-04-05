@@ -23,6 +23,10 @@ const variable = {
     status: 'ERROR',
     message: 'Dữ liệu không có gì thay đổi.',
   },
+  TOKEN_EXPIRED: {
+    status: 'ERROR',
+    message: 'Token đã hết hạn.',
+  },
 };
 
 export default variable;

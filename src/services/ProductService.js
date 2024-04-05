@@ -1,119 +1,126 @@
-import {
-  deleteObject,
-  getDownloadURL,
-  getStorage,
-  ref,
-  uploadBytesResumable,
-} from 'firebase/storage';
+import ProductImage from '../models/ProductImageModel.js';
 import Product from '../models/ProductModel.js';
+import Variant from '../models/VariantModel.js';
+import { generateSKU } from '../utils/index.js';
+import variable from '../variable.js';
 
-// const createProduct = (newProduct) => {
-//   return new Promise(async (resolve, reject) => {
-//     try {
-//       const { image, url } = newProduct;
-//       const fileName = `images/${Date.now() + '_' + image.originalname}`;
-//       const storage = getStorage();
-//       const storageRef = ref(storage, fileName);
-//       const metadata = {
-//         contentType: image.mimetype,
-//       };
-//       const snapshot = await uploadBytesResumable(storageRef, image.buffer, metadata);
-//       const downloadURL = await getDownloadURL(snapshot.ref);
-//       const product = await Product.create({
-//         image: downloadURL,
-//         url: url,
-//         file_name: fileName.split('/')[1],
-//       });
-//       resolve({
-//         status: 'OK',
-//         message: 'Thêm mới Slider thành công.',
-//         data: slider,
-//       });
-//     } catch (error) {
-//       reject(error);
-//     }
-//   });
-// };
+const createProduct = (newProduct) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const { name } = newProduct;
+      const existedProduct = await Product.findOne({ name });
+      if (existedProduct) {
+        resolve({
+          status: 'ERROR',
+          message: 'Sản phẩm này đã tồn tại.',
+        });
+      }
+      const count = await Product.countDocuments();
+      const sku = generateSKU(count);
+      newProduct.sku = sku;
+      const product = await Product.create(newProduct);
+      resolve({
+        status: 'OK',
+        message: 'Thêm mới sản phẩm thành công.',
+        data: product,
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
 
-// const getSlider = () => {
-//   return new Promise(async (resolve, reject) => {
-//     try {
-//       const sliders = await Slider.find({});
-//       resolve({
-//         status: 'OK',
-//         message: 'Danh sách Slider.',
-//         data: sliders,
-//       });
-//     } catch (error) {
-//       reject(error);
-//     }
-//   });
-// };
+const getProduct = (id) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const product = await Product.findById(id);
+      if (!product) resolve(variable.ID_NOTVALID);
+      const [images, variants] = await Promise.all([
+        Variant.find({ _id: product._id }),
+        ProductImage.find({ _id: product._id }),
+      ]);
+      const data = {
+        ...product,
+        variants,
+        images,
+      };
+      resolve({
+        status: 'OK',
+        message: 'Lấy sản phẩm.',
+        data: data,
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+const getProducts = (page, limit, search) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const skip = (page - 1) * limit;
+      let query;
+      if (search) query = { name: { $regex: search, $options: 'i' } };
+      const totalProducts = await Product.countDocuments(query);
+      const suppliers = await Product.find(query).skip(skip).limit(limit);
+      const totalPage = Math.ceil(totalProducts / limit);
+      resolve({
+        status: 'OK',
+        message: 'Lấy danh sách sản phẩm.',
+        data: suppliers,
+        currentPage: page,
+        totalProducts,
+        totalPage,
+        limit,
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
 
-// const updateSlider = (id, data) => {
-//   return new Promise(async (resolve, reject) => {
-//     try {
-//       const checkSlider = await Slider.findOne({ _id: id });
-//       if (!checkSlider) {
-//         return resolve({
-//           status: 'ERROR',
-//           message: 'Slider này không tồn tại.',
-//         });
-//       }
-//       const { image } = data;
-//       const fileName = `images/${Date.now() + '_' + image.originalname}`;
-//       const storage = getStorage();
+const updateProduct = (id, data) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const supplier = await Product.findById(id);
+      if (!supplier) {
+        resolve({
+          status: 'ERROR',
+          message: 'Sản phẩm này không tồn tại.',
+        });
+      }
+      const newProduct = await Product.findByIdAndUpdate(id, data, { new: true });
+      resolve({
+        status: 'OK',
+        message: 'Cập nhật sản phẩm thành công.',
+        data: newProduct,
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
 
-//       // remove image from firebase
-//       const desertRef = ref(storage, checkSlider.file_name);
-//       await deleteObject(desertRef);
+const deleteProduct = (id) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const supplier = await Product.findByIdAndDelete(id);
+      if (!supplier) {
+        resolve({
+          status: 'ERROR',
+          message: 'Sản phẩm này không tồn tại.',
+        });
+      }
 
-//       // add new image to firebase
-//       const storageRef = ref(storage, fileName);
-//       const metadata = {
-//         contentType: image.mimetype,
-//       };
-//       const snapshot = await uploadBytesResumable(storageRef, image.buffer, metadata);
-//       const downloadURL = await getDownloadURL(snapshot.ref);
+      resolve({
+        status: 'OK',
+        message: 'Đã xóa sản phẩm thành công.',
+        data: supplier,
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
 
-//       data.image = downloadURL;
-//       const newSlider = await Slider.findByIdAndUpdate(id, data, { new: true });
-//       resolve({
-//         status: 'OK',
-//         message: 'Cập nhật Slider thành công.',
-//         data: newSlider,
-//       });
-//     } catch (error) {
-//       reject(error);
-//     }
-//   });
-// };
-
-// const deleteSlider = (id) => {
-//   return new Promise(async (resolve, reject) => {
-//     try {
-//       const slider = await Slider.findByIdAndDelete({ _id: id });
-
-//       if (!slider) {
-//         return resolve({
-//           status: 'ERROR',
-//           message: 'Slider này không tồn tại.',
-//         });
-//       }
-
-//       const storage = getStorage();
-//       const desertRef = ref(storage, `images/${slider.file_name}`);
-//       await deleteObject(desertRef);
-
-//       resolve({
-//         status: 'OK',
-//         message: 'Đã xóa Slider thành công.',
-//       });
-//     } catch (error) {
-//       reject(error);
-//     }
-//   });
-// };
-
-const ProductService = {};
+const ProductService = { createProduct, getProduct, getProducts, updateProduct, deleteProduct };
 export default ProductService;
