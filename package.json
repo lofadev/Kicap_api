@@ -21,6 +21,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^7.6.3",
     "multer": "^1.4.5-lts.1",
+    "unidecode": "^1.0.1",
     "validate-image-type": "^3.0.0"
   },
   "devDependencies": {
