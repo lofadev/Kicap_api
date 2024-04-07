@@ -8,6 +8,7 @@ import {
   uploadBytesResumable,
 } from 'firebase/storage';
 import { getApp } from 'firebase/app';
+import unidecode from 'unidecode';
 
 const isEmail = (email) => {
   const regex =
@@ -61,15 +62,10 @@ const refreshTokenService = (token) => {
 
 const getToken = (req) => req.headers.authorization?.split(' ')[1];
 
-function pad(num, size) {
-  let s = num + '';
-  while (s.length < size) s = '0' + s;
-  return s;
-}
-
-const generateSKU = (count) => {
-  count++;
-  return 'SKU' + pad(count, 3);
+const generateSKU = () => {
+  const time = Date.now();
+  const timeString = time.toString();
+  return 'SKU' + timeString.slice(timeString.length - 5, timeString.length);
 };
 
 async function uploadImageToFirebase(image) {
@@ -101,19 +97,27 @@ async function uploadMultipleImagesToFirebase(images) {
   }
 }
 
-async function deleteImageFromFirebase(fileName) {
+async function deleteImageFromFirebase(url) {
   try {
     const firebaseApp = getApp();
     const storage = getStorage(firebaseApp, process.env.FIREBASE_STORAGEBUCKET);
 
     // remove image from firebase
-    const desertRef = ref(storage, fileName);
+    const desertRef = ref(storage, url);
     await deleteObject(desertRef);
   } catch (error) {
     console.error('Error uploading image to Firebase:', error);
     throw error;
   }
 }
+
+const convertToSlug = (value = '') => {
+  const valueLower = value.trim().toLowerCase();
+  const unidecodeValue = unidecode(valueLower);
+  const valueWithoutSpecialChar = unidecodeValue.replace(/[^a-z0-9]+/g, '-');
+  const result = valueWithoutSpecialChar.replace(/^-+|-+$/g, '');
+  return result;
+};
 
 export {
   isEmail,
@@ -127,4 +131,5 @@ export {
   uploadImageToFirebase,
   deleteImageFromFirebase,
   uploadMultipleImagesToFirebase,
+  convertToSlug,
 };
