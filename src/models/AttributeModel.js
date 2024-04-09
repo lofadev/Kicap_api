@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
 
-const AttributeModel = new mongoose.Schema({
+const AttributeSchema = new mongoose.Schema({
   name: { type: String, required: true, unique: true },
   displayOrder: { type: Number, required: true },
 });
 
-const Attribute = mongoose.model('Attribute', AttributeModel);
+const Attribute = mongoose.model('Attribute', AttributeSchema);
 export default Attribute;
