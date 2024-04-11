@@ -11,10 +11,8 @@ const createAttribute = async (req, res) => {
     const response = await AttributeService.createAttribute(req.body);
     return res.status(response.status === 'OK' ? 200 : 400).json(response);
   } catch (error) {
-    return res.status(400).json({
-      status: 'ERROR',
-      message: error,
-    });
+    console.log(error);
+    return res.status(400).json(variable.HAS_ERROR);
   }
 };
 
@@ -28,10 +26,8 @@ const getAttributes = async (req, res) => {
     );
     return res.status(200).json(response);
   } catch (error) {
-    return res.status(400).json({
-      status: 'ERROR',
-      message: error,
-    });
+    console.log(error);
+    return res.status(400).json(variable.HAS_ERROR);
   }
 };
 
@@ -41,10 +37,8 @@ const getAttribute = async (req, res) => {
     const response = await AttributeService.getAttribute(id);
     return res.status(response.status === 'OK' ? 200 : 400).json(response);
   } catch (error) {
-    return res.status(400).json({
-      status: 'ERROR',
-      message: error,
-    });
+    console.log(error);
+    return res.status(400).json(variable.HAS_ERROR);
   }
 };
 
@@ -54,10 +48,8 @@ const updateAttribute = async (req, res) => {
     const response = await AttributeService.updateAttribute(id, req.body);
     return res.status(response.status === 'OK' ? 200 : 400).json(response);
   } catch (error) {
-    return res.status(400).json({
-      status: 'ERROR',
-      message: error,
-    });
+    console.log(error);
+    return res.status(400).json(variable.HAS_ERROR);
   }
 };
 
@@ -67,10 +59,8 @@ const deleteAttribute = async (req, res) => {
     const response = await AttributeService.deleteAttribute(id);
     return res.status(response.status === 'OK' ? 200 : 400).json(response);
   } catch (error) {
-    return res.status(400).json({
-      status: 'ERROR',
-      message: error,
-    });
+    console.log(error);
+    return res.status(400).json(variable.HAS_ERROR);
   }
 };
 
