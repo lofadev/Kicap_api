@@ -10,10 +10,8 @@ const createSupplier = async (req, res) => {
     const response = await SupplierService.createSupplier(req.body);
     return res.status(response.status === 'OK' ? 200 : 400).json(response);
   } catch (error) {
-    return res.status(400).json({
-      status: 'ERROR',
-      message: error,
-    });
+    console.log(error);
+    return res.status(400).json(variable.HAS_ERROR);
   }
 };
 
@@ -27,10 +25,8 @@ const getSuppliers = async (req, res) => {
     );
     return res.status(200).json(response);
   } catch (error) {
-    return res.status(400).json({
-      status: 'ERROR',
-      message: error,
-    });
+    console.log(error);
+    return res.status(400).json(variable.HAS_ERROR);
   }
 };
 
@@ -43,10 +39,8 @@ const getSupplier = async (req, res) => {
     const response = await SupplierService.getSupplier(id);
     return res.status(response.status === 'OK' ? 200 : 400).json(response);
   } catch (error) {
-    return res.status(400).json({
-      status: 'ERROR',
-      message: error,
-    });
+    console.log(error);
+    return res.status(400).json(variable.HAS_ERROR);
   }
 };
 
@@ -66,10 +60,8 @@ const deleteSupplier = async (req, res) => {
     const response = await SupplierService.deleteSupplier(id);
     return res.status(response.status === 'OK' ? 200 : 400).json(response);
   } catch (error) {
-    return res.status(400).json({
-      status: 'ERROR',
-      message: error,
-    });
+    console.log(error);
+    return res.status(400).json(variable.HAS_ERROR);
   }
 };
 

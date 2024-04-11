@@ -10,10 +10,8 @@ const createCategory = async (req, res) => {
     const response = await CategoryService.createCategory(req.body);
     return res.status(response.status === 'OK' ? 200 : 400).json(response);
   } catch (error) {
-    return res.status(400).json({
-      status: 'ERROR',
-      message: error,
-    });
+    console.log(error);
+    return res.status(400).json(variable.HAS_ERROR);
   }
 };
 
@@ -27,10 +25,8 @@ const getCategorys = async (req, res) => {
     );
     return res.status(200).json(response);
   } catch (error) {
-    return res.status(400).json({
-      status: 'ERROR',
-      message: error,
-    });
+    console.log(error);
+    return res.status(400).json(variable.HAS_ERROR);
   }
 };
 
@@ -40,10 +36,8 @@ const getCategory = async (req, res) => {
     const response = await CategoryService.getCategory(id);
     return res.status(response.status === 'OK' ? 200 : 400).json(response);
   } catch (error) {
-    return res.status(400).json({
-      status: 'ERROR',
-      message: error,
-    });
+    console.log(error);
+    return res.status(400).json(variable.HAS_ERROR);
   }
 };
 
@@ -53,10 +47,8 @@ const updateCategory = async (req, res) => {
     const response = await CategoryService.updateCategory(id, req.body);
     return res.status(response.status === 'OK' ? 200 : 400).json(response);
   } catch (error) {
-    return res.status(400).json({
-      status: 'ERROR',
-      message: error,
-    });
+    console.log(error);
+    return res.status(400).json(variable.HAS_ERROR);
   }
 };
 
@@ -66,10 +58,8 @@ const deleteCategory = async (req, res) => {
     const response = await CategoryService.deleteCategory(id);
     return res.status(response.status === 'OK' ? 200 : 400).json(response);
   } catch (error) {
-    return res.status(400).json({
-      status: 'ERROR',
-      message: error,
-    });
+    console.log(error);
+    return res.status(400).json(variable.HAS_ERROR);
   }
 };
 

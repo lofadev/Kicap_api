@@ -52,9 +52,7 @@ const updateUser = async (req, res) => {
     return res.status(200).json(response);
   } catch (error) {
     console.log(error);
-    return res.status(400).json({
-      message: error,
-    });
+    return res.status(400).json(variable.HAS_ERROR);
   }
 };
 
@@ -64,9 +62,8 @@ const deleteUser = async (req, res) => {
     const response = await UserService.deleteUser(userId);
     return res.status(200).json(response);
   } catch (error) {
-    return res.status(400).json({
-      message: error,
-    });
+    console.log(error);
+    return res.status(400).json(variable.HAS_ERROR);
   }
 };
 
@@ -88,9 +85,8 @@ const loginUser = async (req, res) => {
     if (response.status === 'OK') return res.status(200).json(response);
     return res.status(400).json(response);
   } catch (error) {
-    return res.status(400).json({
-      message: error,
-    });
+    console.log(error);
+    return res.status(400).json(variable.HAS_ERROR);
   }
 };
 
@@ -100,9 +96,8 @@ const getAllUser = async (req, res) => {
     const response = await UserService.getAllUser(Number(page || 1), Number(limit || 10), search);
     return res.status(200).json(response);
   } catch (error) {
-    return res.status(400).json({
-      message: error,
-    });
+    console.log(error);
+    return res.status(400).json(variable.HAS_ERROR);
   }
 };
 
@@ -118,9 +113,8 @@ const getDetailsUser = async (req, res) => {
     const response = await UserService.getDetailsUser(userId);
     return res.status(200).json(response);
   } catch (error) {
-    return res.status(400).json({
-      message: error,
-    });
+    console.log(error);
+    return res.status(400).json(variable.HAS_ERROR);
   }
 };
 
@@ -136,9 +130,8 @@ const refreshToken = async (req, res) => {
     const response = await refreshTokenService(token);
     return res.status(response.status === 'OK' ? 200 : 400).json(response);
   } catch (error) {
-    return res.status(400).json({
-      message: error,
-    });
+    console.log(error);
+    return res.status(400).json(variable.HAS_ERROR);
   }
 };
 
@@ -150,9 +143,8 @@ const logoutUser = async (req, res) => {
       message: 'Đăng xuất thành công.',
     });
   } catch (error) {
-    return res.status(400).json({
-      message: error,
-    });
+    console.log(error);
+    return res.status(400).json(variable.HAS_ERROR);
   }
 };
 
