@@ -1,4 +1,5 @@
 import Variant from '../models/VariantModel.js';
+import Product from '../models/ProductModel.js';
 import { generateSKU } from '../utils/index.js';
 
 const createVariant = (payload) => {
@@ -14,8 +15,12 @@ const createVariant = (payload) => {
       }
       while (true) {
         const sku = generateSKU();
-        const variant = await Variant.findOne({ sku });
-        if (!variant) {
+        const [variant, product] = await Promise.all([
+          Variant.findOne({ sku }),
+          Product.findOne({ sku }),
+        ]);
+
+        if (!variant && !product) {
           payload.sku = sku;
           break;
         }
