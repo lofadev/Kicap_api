@@ -7,9 +7,7 @@ const CommentSchema = new mongoose.Schema(
     rating: { type: Number },
     product_id: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
 const Comment = mongoose.model('Comment', CommentSchema);

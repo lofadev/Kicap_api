@@ -22,8 +22,12 @@ const createProduct = (payload) => {
       }
       while (true) {
         const sku = generateSKU();
-        const product = await Product.findOne({ sku });
-        if (!product) {
+        const [variant, product] = await Promise.all([
+          Variant.findOne({ sku }),
+          Product.findOne({ sku }),
+        ]);
+
+        if (!variant && !product) {
           payload.sku = sku;
           break;
         }
@@ -67,7 +71,7 @@ const getProducts = (page, limit, search) => {
       let query;
       if (search) query = { name: { $regex: search, $options: 'i' } };
       const totalProducts = await Product.countDocuments(query);
-      const products = await Product.find(query).skip(skip).limit(limit);
+      const products = await Product.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit);
       const totalPage = Math.ceil(totalProducts / limit);
       resolve({
         status: 'OK',
