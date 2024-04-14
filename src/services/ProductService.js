@@ -32,8 +32,7 @@ const createProduct = (payload) => {
           break;
         }
       }
-      const slug = convertToSlug(name);
-      payload.slug = slug;
+      payload.slug = convertToSlug(name);
       const imageUrl = await uploadImageToFirebase(payload.image);
       payload.image = imageUrl;
       const product = await Product.create(payload);
@@ -128,13 +127,11 @@ const deleteProduct = (id) => {
         ProductImage.find({ productID: id }),
         Variant.deleteMany({ productID: id }),
       ]);
-      console.time('deleteImages');
       const imageUrls = images.map((image) => image.image);
       imageUrls.push(product.image);
       imageUrls.forEach(async (url) => {
         await deleteImageFromFirebase(url);
       });
-      console.timeEnd('deleteImages');
       resolve({
         status: 'OK',
         message: 'Đã xóa sản phẩm thành công.',
