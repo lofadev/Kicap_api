@@ -9,6 +9,7 @@ import AttributeRouter from '../routes/AttributeRouter.js';
 import ProductImageRouter from '../routes/ProductImageRouter.js';
 import VariantRouter from '../routes/VariantRouter.js';
 import OrderStatusRouter from '../routes/OrderStatusRouter.js';
+import InventoryRouter from '../routes/InventoryRouter.js';
 
 const routes = (app) => {
   app.use('/api/user', UserRouter);
@@ -22,6 +23,7 @@ const routes = (app) => {
   app.use('/api/product-image', ProductImageRouter);
   app.use('/api/product-variant', VariantRouter);
   app.use('/api/order-status', OrderStatusRouter);
+  app.use('/api/inventory', InventoryRouter);
 
   app.get('/', (req, res) => {
     res.json({ name: 'Hi LofA' });
