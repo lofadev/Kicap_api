@@ -35,6 +35,7 @@ const createProduct = (payload) => {
       payload.slug = convertToSlug(name);
       const imageUrl = await uploadImageToFirebase(payload.image);
       payload.image = imageUrl;
+      payload.more_image = imageUrl;
       const product = await Product.create(payload);
       resolve({
         status: 'OK',
@@ -63,12 +64,14 @@ const getProduct = (id) => {
   });
 };
 
-const getProducts = (page, limit, search) => {
+const getProducts = (page, limit, search, type) => {
   return new Promise(async (resolve, reject) => {
     try {
       const skip = (page - 1) * limit;
       let query;
-      if (search) query = { name: { $regex: search, $options: 'i' } };
+      if (search && type) query = { name: { $regex: search, $options: 'i' }, category: type };
+      else if (search) query = { name: { $regex: search, $options: 'i' } };
+      else if (type) query = { category: type };
       const totalProducts = await Product.countDocuments(query);
       const products = await Product.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit);
       const totalPage = Math.ceil(totalProducts / limit);
