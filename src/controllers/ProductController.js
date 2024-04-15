@@ -30,11 +30,12 @@ const getProduct = async (req, res) => {
 
 const getProducts = async (req, res) => {
   try {
-    const { page, limit, search } = req.query;
+    const { page, limit, search, type } = req.query;
     const response = await ProductService.getProducts(
       Number(page || 1),
       Number(limit || 10),
-      search
+      search,
+      type
     );
     return res.status(200).json(response);
   } catch (error) {
