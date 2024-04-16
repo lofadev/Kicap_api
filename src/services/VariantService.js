@@ -5,7 +5,7 @@ import { generateSKU } from '../utils/index.js';
 const createVariant = (payload) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const { value } = payload;
+      const { value, price, discount } = payload;
       const variant = await Variant.findOne({ value });
       if (variant) {
         return resolve({
@@ -25,7 +25,12 @@ const createVariant = (payload) => {
           break;
         }
       }
-      const variantCreated = await Variant.create(payload);
+      const salePrice = price - (price * discount) / 100;
+      payload.salePrice = salePrice;
+      const [variantCreated] = await Promise.all([
+        Variant.create(payload),
+        Product.findByIdAndUpdate(payload.productID, { hasVariant: true }, { new: true }),
+      ]);
       resolve({
         status: 'OK',
         message: 'Thêm mới biến thể của sản phẩm thành công.',
@@ -74,10 +79,12 @@ const getVariant = (id) => {
   });
 };
 
-const updateVariant = (id, data) => {
+const updateVariant = (id, payload) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const newVariant = await Variant.findByIdAndUpdate(id, data, { new: true });
+      const salePrice = payload.price - (payload.price * payload.discount) / 100;
+      payload.salePrice = salePrice;
+      const newVariant = await Variant.findByIdAndUpdate(id, payload, { new: true });
       if (!newVariant) {
         resolve({
           status: 'ERROR',

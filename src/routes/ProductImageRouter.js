@@ -18,7 +18,7 @@ router.post(
   ProductImageController.createProductImage
 );
 router.get('/max-order', authMiddleWare, ProductImageController.getMaxOrder);
-router.get('/get-all', authMiddleWare, ProductImageController.getProductImages);
+router.get('/get-all', ProductImageController.getProductImages);
 router.get('/:id', validateIdParam, authMiddleWare, ProductImageController.getProductImage);
 router.put(
   '/update/:id',

@@ -21,8 +21,8 @@ router.post(
   validateImage,
   ProductController.createProduct
 );
-router.get('/get-all', authMiddleWare, ProductController.getProducts);
-router.get('/:id', validateIdParam, authMiddleWare, ProductController.getProduct);
+router.get('/get-all', ProductController.getProducts);
+router.get('/:id', validateIdParam, ProductController.getProduct);
 router.put(
   '/update/:id',
   validateIdParam,

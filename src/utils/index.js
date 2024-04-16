@@ -119,6 +119,8 @@ const convertToSlug = (value = '') => {
   return result;
 };
 
+const roundedPrice = (price) => Math.round(price / 1000) * 1000;
+
 export {
   isEmail,
   isVietNamPhoneNumber,
@@ -132,4 +134,5 @@ export {
   deleteImageFromFirebase,
   uploadMultipleImagesToFirebase,
   convertToSlug,
+  roundedPrice,
 };
