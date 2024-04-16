@@ -5,6 +5,7 @@ import {
   convertToSlug,
   deleteImageFromFirebase,
   generateSKU,
+  roundedPrice,
   uploadImageToFirebase,
 } from '../utils/index.js';
 import variable from '../variable.js';
@@ -93,11 +94,13 @@ const getProducts = (page, limit, search, type) => {
 const updateProduct = (id, payload) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const { image } = payload;
+      const { image, price, discount } = payload;
       if (image) {
         const imageURL = await uploadImageToFirebase(image);
         payload.image = imageURL;
       }
+      const salePrice = price - (price * discount) / 100;
+      payload.salePrice = roundedPrice(salePrice);
       const newProduct = await Product.findByIdAndUpdate(id, payload, { new: true });
       if (!newProduct) {
         resolve({

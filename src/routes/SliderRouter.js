@@ -21,7 +21,7 @@ router.post(
   validateImage,
   SliderController.createSlider
 );
-router.get('/get-all', authMiddleWare, SliderController.getSliders);
+router.get('/get-all', SliderController.getSliders);
 router.get('/:id', authMiddleWare, SliderController.getSlider);
 router.put(
   '/update/:id',
