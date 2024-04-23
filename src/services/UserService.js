@@ -153,6 +153,7 @@ const getDetailsUser = (id) => {
           message: 'User này không tồn tại.',
         });
       }
+
       resolve({
         status: 'OK',
         message: 'SUCCESS',
@@ -164,5 +165,45 @@ const getDetailsUser = (id) => {
   });
 };
 
-const UserService = { createUser, updateUser, deleteUser, loginUser, getAllUser, getDetailsUser };
+const changePassword = (id, payload) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const { oldPassword, newPassword } = payload;
+      const user = await User.findById(id);
+      if (!user) {
+        resolve({
+          status: 'ERROR',
+          message: 'User này không tồn tại.',
+        });
+      }
+      const comparePassword = bcrypt.compareSync(oldPassword, user.password);
+      if (!comparePassword) {
+        resolve({
+          status: 'ERROR',
+          message: 'Mật khẩu cũ không chính xác.',
+        });
+      }
+      const hash = bcrypt.hashSync(newPassword, 10);
+      const result = await User.findByIdAndUpdate(id, { password: hash });
+      if (result) {
+        resolve({
+          status: 'OK',
+          message: 'Cập nhật mật khẩu thành công',
+        });
+      }
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+const UserService = {
+  createUser,
+  updateUser,
+  deleteUser,
+  loginUser,
+  getAllUser,
+  getDetailsUser,
+  changePassword,
+};
 export default UserService;
