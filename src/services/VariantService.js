@@ -106,6 +106,11 @@ const deleteVariant = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
       const variant = await Variant.findByIdAndDelete(id);
+      const productID = variant.productID;
+      const totalVariantOfProduct = await Variant.countDocuments({ productID });
+      if (totalVariantOfProduct === 0) {
+        await Product.findByIdAndUpdate(productID, { hasVariant: false });
+      }
       if (!variant) {
         resolve({
           status: 'ERROR',

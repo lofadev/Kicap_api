@@ -148,6 +148,27 @@ const logoutUser = async (req, res) => {
   }
 };
 
+const changePassword = async (req, res) => {
+  try {
+    const { oldPassword, newPassword, confirmPassword } = req.body;
+    const id = req.params.id;
+    if (!oldPassword || !newPassword || !confirmPassword) {
+      return res.status(400).json(variable.NOT_EMPTY);
+    }
+    if (newPassword !== confirmPassword)
+      return res.status(400).json({
+        status: 'ERROR',
+        message: 'Xác nhận mật khẩu không trùng khớp.',
+      });
+    const payload = { oldPassword, newPassword };
+    const response = await UserService.changePassword(id, payload);
+    return res.status(response.status === 'OK' ? 200 : 400).json(response);
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json(variable.HAS_ERROR);
+  }
+};
+
 const UserController = {
   createUser,
   updateUser,
@@ -157,5 +178,6 @@ const UserController = {
   getDetailsUser,
   refreshToken,
   logoutUser,
+  changePassword,
 };
 export default UserController;
