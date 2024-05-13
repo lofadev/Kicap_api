@@ -1,5 +1,4 @@
-import jwt from 'jsonwebtoken';
-import variable from '../variable.js';
+import { getApp } from 'firebase/app';
 import {
   deleteObject,
   getDownloadURL,
@@ -7,8 +6,9 @@ import {
   ref,
   uploadBytesResumable,
 } from 'firebase/storage';
-import { getApp } from 'firebase/app';
+import jwt from 'jsonwebtoken';
 import unidecode from 'unidecode';
+import variable from '../variable.js';
 
 const isEmail = (email) => {
   const regex =
@@ -121,18 +121,35 @@ const convertToSlug = (value = '') => {
 
 const roundedPrice = (price) => Math.round(price / 1000) * 1000;
 
+const sortObject = (obj) => {
+  let sorted = {};
+  let str = [];
+  let key;
+  for (key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      str.push(encodeURIComponent(key));
+    }
+  }
+  str.sort();
+  for (key = 0; key < str.length; key++) {
+    sorted[str[key]] = encodeURIComponent(obj[str[key]]).replace(/%20/g, '+');
+  }
+  return sorted;
+};
+
 export {
-  isEmail,
-  isVietNamPhoneNumber,
+  convertToSlug,
+  deleteImageFromFirebase,
   generateAccessToken,
   generateRefreshToken,
-  isTokenExpired,
-  refreshTokenService,
-  getToken,
   generateSKU,
-  uploadImageToFirebase,
-  deleteImageFromFirebase,
-  uploadMultipleImagesToFirebase,
-  convertToSlug,
+  getToken,
+  isEmail,
+  isTokenExpired,
+  isVietNamPhoneNumber,
+  refreshTokenService,
   roundedPrice,
+  sortObject,
+  uploadImageToFirebase,
+  uploadMultipleImagesToFirebase,
 };
