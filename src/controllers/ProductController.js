@@ -68,5 +68,23 @@ const deleteProduct = async (req, res) => {
   }
 };
 
-const ProductController = { createProduct, getProduct, getProducts, updateProduct, deleteProduct };
+const checkQuantityProduct = async (req, res) => {
+  try {
+    const { ids } = req.body;
+    const response = await ProductService.checkQuantityProduct(ids);
+    return res.status(response.status === 'OK' ? 200 : 400).json(response);
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json(variable.HAS_ERROR);
+  }
+};
+
+const ProductController = {
+  createProduct,
+  getProduct,
+  getProducts,
+  updateProduct,
+  deleteProduct,
+  checkQuantityProduct,
+};
 export default ProductController;

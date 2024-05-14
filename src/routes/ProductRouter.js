@@ -32,5 +32,6 @@ router.put(
   ProductController.updateProduct
 );
 router.delete('/delete/:id', validateIdParam, authMiddleWare, ProductController.deleteProduct);
+router.post('/check-quantity', ProductController.checkQuantityProduct);
 
 export default router;
