@@ -11,6 +11,7 @@ import VariantRouter from '../routes/VariantRouter.js';
 import OrderStatusRouter from '../routes/OrderStatusRouter.js';
 import InventoryRouter from '../routes/InventoryRouter.js';
 import CheckoutRouter from '../routes/CheckoutRouter.js';
+import OrderRouter from '../routes/OrderRouter.js';
 
 const routes = (app) => {
   app.use('/api/user', UserRouter);
@@ -26,6 +27,7 @@ const routes = (app) => {
   app.use('/api/order-status', OrderStatusRouter);
   app.use('/api/inventory', InventoryRouter);
   app.use('/api/checkout', CheckoutRouter);
+  app.use('/api/order', OrderRouter);
 
   app.get('/', (req, res) => {
     res.json({ name: 'Hi LofA' });

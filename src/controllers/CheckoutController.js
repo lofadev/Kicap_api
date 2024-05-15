@@ -4,6 +4,11 @@ import querystring from 'qs';
 import { sortObject } from '../utils/index.js';
 
 const createPaymentUrl = (req, res) => {
+  const ipAddr =
+    req.headers['x-forwarded-for'] ||
+    req.connection.remoteAddress ||
+    req.socket.remoteAddress ||
+    req.connection.socket.remoteAddress;
   const tmnCode = process.env.VNP_TMNCODE;
   const secretKey = process.env.VNP_HASHSECRET;
   let vnpUrl = process.env.VNP_URL;
@@ -31,7 +36,7 @@ const createPaymentUrl = (req, res) => {
   vnp_Params['vnp_OrderType'] = orderType;
   vnp_Params['vnp_Amount'] = amount * 100;
   vnp_Params['vnp_ReturnUrl'] = returnUrl;
-  vnp_Params['vnp_IpAddr'] = '127.0.0.1';
+  vnp_Params['vnp_IpAddr'] = ipAddr;
   vnp_Params['vnp_CreateDate'] = createDate;
   if (bankCode !== null && bankCode !== '') {
     vnp_Params['vnp_BankCode'] = bankCode;

@@ -153,5 +153,36 @@ const deleteProduct = (id) => {
   });
 };
 
-const ProductService = { createProduct, getProduct, getProducts, updateProduct, deleteProduct };
+const checkQuantityProduct = (ids) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const [products, variants] = await Promise.all([
+        Product.find({ _id: { $in: ids } }),
+        Variant.find({ _id: { $in: ids } }),
+      ]);
+      const resData = [...products, ...variants].map((data) => {
+        return {
+          id: data._id,
+          stock: data.stock,
+        };
+      });
+      resolve({
+        status: 'OK',
+        message: 'Kiểm tra số lượng order so với số lượng tồn kho',
+        data: resData,
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+const ProductService = {
+  createProduct,
+  getProduct,
+  getProducts,
+  updateProduct,
+  deleteProduct,
+  checkQuantityProduct,
+};
 export default ProductService;
