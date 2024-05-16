@@ -7,6 +7,7 @@ const OrderDetailsSchema = new mongoose.Schema(
     image: { type: String, required: true },
     quantity: { type: Number, required: true },
     price: { type: Number, required: true },
+    variant: { type: String, default: '' },
   },
   { timestamps: true }
 );
