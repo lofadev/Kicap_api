@@ -30,6 +30,11 @@ const createUser = async (req, res) => {
       });
     }
     const response = await UserService.createUser(req.body);
+    if (response.status === 'OK') {
+      const { email } = response.data;
+      const hashEmail = bcrypt.hashSync(email, 10);
+      console.log(email, hashEmail);
+    }
     return res.status(200).json(response);
   } catch (error) {
     return res.status(400).json({
@@ -162,6 +167,7 @@ const changePassword = async (req, res) => {
       });
     const payload = { oldPassword, newPassword };
     const response = await UserService.changePassword(id, payload);
+
     return res.status(response.status === 'OK' ? 200 : 400).json(response);
   } catch (error) {
     console.log(error);

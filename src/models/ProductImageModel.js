@@ -7,7 +7,6 @@ const ImageSchema = new mongoose.Schema(
     description: { type: String, default: '' },
     displayOrder: { type: Number, defautl: 0 },
     isHidden: { type: Boolean, default: false },
-    fileName: { type: String, default: '' },
   },
   { timestamps: true }
 );

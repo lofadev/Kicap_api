@@ -11,6 +11,7 @@ const UserSchema = new mongoose.Schema(
     address: { type: String, default: '' },
     province: { type: String, default: '' },
     isLocked: { type: Number, default: 0 },
+    isVerify: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
