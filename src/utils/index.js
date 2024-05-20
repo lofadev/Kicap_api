@@ -1,3 +1,4 @@
+import nodemailer from 'nodemailer';
 import { getApp } from 'firebase/app';
 import {
   deleteObject,
@@ -137,6 +138,32 @@ const sortObject = (obj) => {
   return sorted;
 };
 
+const transporter = nodemailer.createTransport({
+  host: 'smtp.ethereal.email',
+  port: 587,
+  secure: false, // Use `true` for port 465, `false` for all other ports
+  auth: {
+    user: process.env.MAILER_EMAIL,
+    pass: process.env.MAILER_PASS,
+  },
+});
+
+// async..await is not allowed in global scope, must use a wrapper
+const sendEmail = async (to, subject, html) => {
+  // send mail with defined transport object
+  try {
+    const info = await transporter.sendMail({
+      from: `"LofA:" <${process.env.MAILER_EMAIL}>`, // sender address
+      to, // list of receivers
+      subject,
+      textsubject,
+      html,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 export {
   convertToSlug,
   deleteImageFromFirebase,
@@ -152,4 +179,5 @@ export {
   sortObject,
   uploadImageToFirebase,
   uploadMultipleImagesToFirebase,
+  sendEmail,
 };
