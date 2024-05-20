@@ -1,5 +1,13 @@
+import bcrypt from 'bcrypt';
 import UserService from '../services/UserService.js';
-import { getToken, isEmail, isVietNamPhoneNumber, refreshTokenService } from '../utils/index.js';
+import {
+  generateOTP,
+  getToken,
+  isEmail,
+  isVietNamPhoneNumber,
+  refreshTokenService,
+  sendEmail,
+} from '../utils/index.js';
 import variable from '../variable.js';
 
 const createUser = async (req, res) => {
@@ -37,9 +45,8 @@ const createUser = async (req, res) => {
     }
     return res.status(200).json(response);
   } catch (error) {
-    return res.status(400).json({
-      message: error,
-    });
+    console.log(error);
+    return res.status(400).json(variable.HAS_ERROR);
   }
 };
 
@@ -175,6 +182,47 @@ const changePassword = async (req, res) => {
   }
 };
 
+const verifyEmail = async (req, res) => {
+  try {
+    return res.status(200).json({
+      status: 'OK',
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json(variable.HAS_ERROR);
+  }
+};
+
+const getPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const hashedValue = bcrypt.hashSync(email, 10);
+    const url = `${process.env.APP_URL}/account/new_password?email=${email}&token=${hashedValue}`;
+    console.log(url);
+    const html = `<a href="${url}">Thay đổi mật khẩu</a>`;
+    const response = await sendEmail(email, 'test', html);
+    if (response)
+      return res.status(200).json({
+        status: 'OK',
+        message: 'Vui lòng kiểm tra email để thay đổi mật khẩu mới.',
+      });
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json(variable.HAS_ERROR);
+  }
+};
+
+const resetPassword = async (req, res) => {
+  try {
+    return res.status(200).json({
+      status: 'OK',
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json(variable.HAS_ERROR);
+  }
+};
+
 const UserController = {
   createUser,
   updateUser,
@@ -185,5 +233,8 @@ const UserController = {
   refreshToken,
   logoutUser,
   changePassword,
+  verifyEmail,
+  getPassword,
+  resetPassword,
 };
 export default UserController;

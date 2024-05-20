@@ -19,6 +19,8 @@ router.put(
 );
 router.delete('/delete/:id', validateIdParam, authMiddleWare, UserController.deleteUser);
 router.post('/refresh-token', UserController.refreshToken);
-router.post('/verify-email', UserController.refreshToken);
+router.post('/verify-email', UserController.verifyEmail);
+router.post('/get-password', UserController.getPassword);
+router.post('/reset-password', UserController.resetPassword);
 
 export default router;

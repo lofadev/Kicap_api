@@ -10,6 +10,9 @@ import {
 import jwt from 'jsonwebtoken';
 import unidecode from 'unidecode';
 import variable from '../variable.js';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const isEmail = (email) => {
   const regex =
@@ -139,6 +142,7 @@ const sortObject = (obj) => {
 };
 
 const transporter = nodemailer.createTransport({
+  service: 'gmail',
   host: 'smtp.ethereal.email',
   port: 587,
   secure: false, // Use `true` for port 465, `false` for all other ports
@@ -148,21 +152,29 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// async..await is not allowed in global scope, must use a wrapper
 const sendEmail = async (to, subject, html) => {
-  // send mail with defined transport object
   try {
     const info = await transporter.sendMail({
       from: `"LofA:" <${process.env.MAILER_EMAIL}>`, // sender address
-      to, // list of receivers
+      to,
       subject,
-      textsubject,
       html,
     });
+    return info;
   } catch (error) {
     console.log(error);
   }
 };
+
+function generateOTP() {
+  let digits = '0123456789';
+  let OTP = '';
+  let len = digits.length;
+  for (let i = 0; i < 4; i++) {
+    OTP += digits[Math.floor(Math.random() * len)];
+  }
+  return OTP;
+}
 
 export {
   convertToSlug,
@@ -180,4 +192,5 @@ export {
   uploadImageToFirebase,
   uploadMultipleImagesToFirebase,
   sendEmail,
+  generateOTP,
 };
