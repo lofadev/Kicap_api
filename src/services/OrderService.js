@@ -73,6 +73,37 @@ const updateIsPaid = (id) => {
   });
 };
 
+const getAll = (payload) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const { status, fromDate, toDate, page, limit } = payload;
+      const skip = (page - 1) * limit;
+      let query = { createdAt: { $gte: fromDate, $lt: toDate } };
+      if (status) {
+        query = { status, createdAt: { $gte: fromDate, $lt: toDate } };
+      }
+      const [orders, totalOrders] = await Promise.all([
+        Order.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit),
+        Order.countDocuments(query),
+      ]);
+      const totalPage = Math.ceil(totalOrders / limit);
+      resolve({
+        status: 'OK',
+        message: 'Lấy danh sách đơn đặt hàng.',
+        data: orders,
+        pagination: {
+          currentPage: page,
+          totalOrders,
+          totalPage,
+          limit,
+        },
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
 const deleteOrder = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -127,5 +158,5 @@ const deleteOrder = (id) => {
   });
 };
 
-const OrderService = { createOrder, updateIsPaid, deleteOrder };
+const OrderService = { createOrder, updateIsPaid, deleteOrder, getAll };
 export default OrderService;

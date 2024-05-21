@@ -41,10 +41,21 @@ const createUser = async (req, res) => {
     const response = await UserService.createUser(req.body);
     if (response.status === 'OK') {
       const { email } = response.data;
-      const hashEmail = bcrypt.hashSync(email, 10);
-      console.log(email, hashEmail);
+      const token = generateToken({ email }, '30m');
+      const url = `${process.env.APP_URL}/account/verify_email?email=${email}&token=${token}`;
+      const html = `
+        <p style="font-size: 18px;">Vui lòng xác thực tài khoản bằng cách click vào nút bên dưới.</p>
+        <a href="${url}" style="display: inline-block; padding: 10px 20px; color: white; border-radius: 5px; background-color: black; text-decoration: none;">Xác thực tài khoản</a>
+      `;
+      const resSendEmail = await sendEmail(email, 'Xác thực tài khoản | Kicap', html);
+      if (resSendEmail.accepted.length > 0) {
+        return res.status(200).json({
+          status: 'OK',
+          message: 'Đăng ký tài khoản thành công. Vui lòng kiểm tra email để xác thực tài khoản.',
+        });
+      }
     }
-    return res.status(200).json(response);
+    return res.status(400).json(response);
   } catch (error) {
     console.log(error);
     return res.status(400).json(variable.HAS_ERROR);
@@ -95,8 +106,7 @@ const loginUser = async (req, res) => {
       });
     }
     const response = await UserService.loginUser(req.body);
-    if (response.status === 'OK') return res.status(200).json(response);
-    return res.status(400).json(response);
+    return res.status(response.status === 'OK' ? 200 : 400).json(response);
   } catch (error) {
     console.log(error);
     return res.status(400).json(variable.HAS_ERROR);
@@ -185,8 +195,24 @@ const changePassword = async (req, res) => {
 
 const verifyEmail = async (req, res) => {
   try {
-    return res.status(200).json({
-      status: 'OK',
+    const { email, token } = req.body;
+    if (!email || !token) {
+      return res.status(400).json(variable.NOT_EMPTY);
+    }
+
+    jwt.verify(token, process.env.ACCESS_TOKEN, async function (err, data) {
+      if (err) {
+        if (err.name === 'TokenExpiredError') {
+          return res.status(401).json(variable.TOKEN_EXPIRED);
+        }
+        return res.status(400).json(variable.HAS_ERROR);
+      }
+      if (data?.email === email) {
+        const response = await UserService.verifyEmail(email);
+        return res.status(response.status === 'OK' ? 200 : 400).json(response);
+      } else {
+        return res.status(400).json(variable.HAS_ERROR);
+      }
     });
   } catch (error) {
     console.log(error);
@@ -274,6 +300,28 @@ const newPasswordCheck = async (req, res) => {
   }
 };
 
+const sendVerifyEmail = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const token = generateToken({ email }, '30m');
+    const url = `${process.env.APP_URL}/account/verify_email?email=${email}&token=${token}`;
+    const html = `
+        <p style="font-size: 18px;">Vui lòng xác thực tài khoản bằng cách click vào nút bên dưới.</p>
+        <a href="${url}" style="display: inline-block; padding: 10px 20px; color: white; border-radius: 5px; background-color: black; text-decoration: none;">Xác thực tài khoản</a>
+      `;
+    const resSendEmail = await sendEmail(email, 'Xác thực tài khoản | Kicap', html);
+    if (resSendEmail.accepted.length > 0) {
+      return res.status(200).json({
+        status: 'OK',
+        message: 'Đã gửi đến email. Vui lòng kiểm tra email để xác thực.',
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json(variable.HAS_ERROR);
+  }
+};
+
 const UserController = {
   createUser,
   updateUser,
@@ -288,5 +336,6 @@ const UserController = {
   getPassword,
   resetPassword,
   newPasswordCheck,
+  sendVerifyEmail,
 };
 export default UserController;
