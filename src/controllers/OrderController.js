@@ -48,8 +48,25 @@ const createOrder = async (req, res) => {
   }
 };
 
+const getAll = async (req, res) => {
+  try {
+    const { status, fromDate, toDate } = req.query;
+    if (!fromDate || !toDate) {
+      return res.status(400).json(variable.NOT_EMPTY);
+    }
+
+    const payload = { status, fromDate, toDate };
+    const response = await OrderService.getAll(payload);
+    return res.status(response.status === 'OK' ? 200 : 400).json(response);
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json(variable.HAS_ERROR);
+  }
+};
+
 const OrderController = {
   createOrder,
+  getAll,
 };
 
 export default OrderController;

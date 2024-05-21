@@ -1,7 +1,6 @@
 import bcrypt from 'bcrypt';
 import User from '../models/UserModel.js';
 import { generateAccessToken, generateRefreshToken } from '../utils/index.js';
-import ResetPassword from '../models/PasswordResetModel.js';
 
 const createUser = (newUser) => {
   return new Promise(async (resolve, reject) => {
@@ -94,6 +93,13 @@ const loginUser = (payload) => {
         resolve({
           status: 'ERROR',
           message: 'Mật khẩu không chính xác.',
+        });
+      }
+      if (!user.isVerify) {
+        resolve({
+          status: 'ERROR',
+          message:
+            'Tài khoản của bạn chưa được xác thực. Vui lòng kiểm tra email hoặc nhấn vào nút gửi lại để tiến hành xác thực lại email.',
         });
       }
       const accessToken = generateAccessToken({
@@ -240,6 +246,34 @@ const resetPassword = (payload) => {
   });
 };
 
+const verifyEmail = (email) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const user = await User.findOne({ email });
+      if (user) {
+        const isEmailVerify = await User.findOneAndUpdate(
+          { email },
+          { isVerify: true },
+          { new: true }
+        );
+        if (isEmailVerify) {
+          resolve({
+            status: 'OK',
+            message: 'Xác thực email thành công.',
+          });
+        }
+      } else {
+        resolve({
+          status: 'ERROR',
+          message: 'Email này không tồn tại.',
+        });
+      }
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
 const UserService = {
   createUser,
   updateUser,
@@ -250,5 +284,6 @@ const UserService = {
   changePassword,
   getPassword,
   resetPassword,
+  verifyEmail,
 };
 export default UserService;
