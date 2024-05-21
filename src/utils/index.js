@@ -35,6 +35,11 @@ const generateRefreshToken = (payload) => {
   return refreshToken;
 };
 
+const generateToken = (payload, expiredTime) => {
+  const token = jwt.sign(payload, process.env.ACCESS_TOKEN, { expiresIn: expiredTime });
+  return token;
+};
+
 const isTokenExpired = (token) => {
   const decodedToken = jwt.decode(token);
   const currentTime = Date.now() / 1000;
@@ -193,4 +198,5 @@ export {
   uploadMultipleImagesToFirebase,
   sendEmail,
   generateOTP,
+  generateToken,
 };

@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
 import User from '../models/UserModel.js';
 import { generateAccessToken, generateRefreshToken } from '../utils/index.js';
+import ResetPassword from '../models/PasswordResetModel.js';
 
 const createUser = (newUser) => {
   return new Promise(async (resolve, reject) => {
@@ -197,6 +198,48 @@ const changePassword = (id, payload) => {
   });
 };
 
+const getPassword = (email) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const resUser = await User.findOne({ email });
+      if (!resUser) {
+        resolve({
+          status: 'ERROR',
+          message: 'Email này không tồn tại.',
+        });
+      }
+      resolve({
+        status: 'OK',
+        message: 'Vui lòng kiểm tra email để thay đổi mật khẩu mới.',
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+const resetPassword = (payload) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const { email, newPassword } = payload;
+      const hashPassword = bcrypt.hashSync(newPassword, 10);
+      const newUserPassword = await User.findOneAndUpdate(
+        { email },
+        { password: hashPassword },
+        { new: true }
+      );
+      if (newUserPassword) {
+        resolve({
+          status: 'OK',
+          message: 'Đổi mật khẩu thành công.',
+        });
+      }
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
 const UserService = {
   createUser,
   updateUser,
@@ -205,5 +248,7 @@ const UserService = {
   getAllUser,
   getDetailsUser,
   changePassword,
+  getPassword,
+  resetPassword,
 };
 export default UserService;

@@ -1,7 +1,8 @@
+import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import UserService from '../services/UserService.js';
 import {
-  generateOTP,
+  generateToken,
   getToken,
   isEmail,
   isVietNamPhoneNumber,
@@ -196,16 +197,18 @@ const verifyEmail = async (req, res) => {
 const getPassword = async (req, res) => {
   try {
     const { email } = req.body;
-    const hashedValue = bcrypt.hashSync(email, 10);
-    const url = `${process.env.APP_URL}/account/new_password?email=${email}&token=${hashedValue}`;
-    console.log(url);
+    const token = generateToken({ email }, '10m');
+    const url = `${process.env.APP_URL}/account/new_password?email=${email}&token=${token}`;
     const html = `<a href="${url}">Thay đổi mật khẩu</a>`;
-    const response = await sendEmail(email, 'test', html);
-    if (response)
-      return res.status(200).json({
-        status: 'OK',
-        message: 'Vui lòng kiểm tra email để thay đổi mật khẩu mới.',
-      });
+    const resService = await UserService.getPassword(email);
+    if (resService.status === 'OK') {
+      const resSendEmail = await sendEmail(email, 'test', html);
+      if (resSendEmail.accepted.length > 0) {
+        return res.status(200).json(resService);
+      }
+    } else {
+      return res.status(400).json(resService);
+    }
   } catch (error) {
     console.log(error);
     return res.status(400).json(variable.HAS_ERROR);
@@ -214,8 +217,56 @@ const getPassword = async (req, res) => {
 
 const resetPassword = async (req, res) => {
   try {
-    return res.status(200).json({
-      status: 'OK',
+    const { newPassword, email, token } = req.body;
+    if (!newPassword || !email || !token) {
+      return res.status(400).json(variable.NOT_EMPTY);
+    }
+    jwt.verify(token, process.env.ACCESS_TOKEN, async function (err, data) {
+      if (err) {
+        if (err.name === 'TokenExpiredError') {
+          return res.status(401).json(variable.TOKEN_EXPIRED);
+        }
+        return res.status(400).json(variable.HAS_ERROR);
+      }
+      if (data?.email === email) {
+        const payload = { email, newPassword };
+        const response = await UserService.resetPassword(payload);
+        if (response.status === 'OK') {
+          return res.status(200).json(response);
+        }
+      } else {
+        return res.status(400).json({
+          status: 'ERROR',
+        });
+      }
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json(variable.HAS_ERROR);
+  }
+};
+
+const newPasswordCheck = async (req, res) => {
+  try {
+    const { email, token } = req.body;
+    if (!email || !token) {
+      return res.redirect(process.env.APP_URL + '/account/reset_password');
+    }
+    jwt.verify(token, process.env.ACCESS_TOKEN, function (err, data) {
+      if (err) {
+        return res.status(400).json({
+          status: 'ERROR',
+        });
+      }
+      if (data?.email === email) {
+        return res.status(200).json({
+          status: 'OK',
+        });
+      } else {
+        return res.status(400).json({
+          status: 'ERROR',
+        });
+      }
     });
   } catch (error) {
     console.log(error);
@@ -236,5 +287,6 @@ const UserController = {
   verifyEmail,
   getPassword,
   resetPassword,
+  newPasswordCheck,
 };
 export default UserController;
