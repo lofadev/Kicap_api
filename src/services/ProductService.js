@@ -177,6 +177,25 @@ const checkQuantityProduct = (ids) => {
   });
 };
 
+const getBrands = () => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const products = await Product.find();
+      const brands = [];
+      products.forEach((product) => {
+        if (!brands.includes(product.brand)) brands.push(product.brand);
+      });
+      resolve({
+        status: 'OK',
+        message: 'Lấy danh sách thương hiệu',
+        data: brands,
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
 const ProductService = {
   createProduct,
   getProduct,
@@ -184,5 +203,6 @@ const ProductService = {
   updateProduct,
   deleteProduct,
   checkQuantityProduct,
+  getBrands,
 };
 export default ProductService;

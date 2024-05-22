@@ -22,7 +22,8 @@ router.post(
   ProductController.createProduct
 );
 router.get('/get-all', ProductController.getProducts);
-router.get('/:id', validateIdParam, ProductController.getProduct);
+router.get('/get-brand', ProductController.getBrands);
+router.post('/check-quantity', ProductController.checkQuantityProduct);
 router.put(
   '/update/:id',
   validateIdParam,
@@ -32,6 +33,6 @@ router.put(
   ProductController.updateProduct
 );
 router.delete('/delete/:id', validateIdParam, authMiddleWare, ProductController.deleteProduct);
-router.post('/check-quantity', ProductController.checkQuantityProduct);
+router.get('/:id', validateIdParam, ProductController.getProduct);
 
 export default router;
