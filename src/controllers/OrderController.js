@@ -50,12 +50,18 @@ const createOrder = async (req, res) => {
 
 const getAll = async (req, res) => {
   try {
-    const { status, fromDate, toDate } = req.query;
+    const { status, fromDate, toDate, page, limit } = req.query;
     if (!fromDate || !toDate) {
       return res.status(400).json(variable.NOT_EMPTY);
     }
 
-    const payload = { status, fromDate, toDate };
+    const payload = {
+      status,
+      fromDate,
+      toDate,
+      page: Number(page || 1),
+      limit: Number(limit || 10),
+    };
     const response = await OrderService.getAll(payload);
     return res.status(response.status === 'OK' ? 200 : 400).json(response);
   } catch (error) {
