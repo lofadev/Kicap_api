@@ -37,7 +37,7 @@ const createOrder = (newOrder) => {
         const updatedStock = variant.stock - item.quantity;
         return Variant.findByIdAndUpdate(item.id, { stock: updatedStock }, { new: true });
       });
-      const results = await Promise.all([...promiseProduct, ...promiseVariant]);
+      await Promise.all([...promiseProduct, ...promiseVariant]);
 
       if (order && orderDetails) {
         resolve({

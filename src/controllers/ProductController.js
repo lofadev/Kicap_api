@@ -79,6 +79,16 @@ const checkQuantityProduct = async (req, res) => {
   }
 };
 
+const getBrands = async (req, res) => {
+  try {
+    const response = await ProductService.getBrands();
+    return res.status(200).json(response);
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json(variable.HAS_ERROR);
+  }
+};
+
 const ProductController = {
   createProduct,
   getProduct,
@@ -86,5 +96,6 @@ const ProductController = {
   updateProduct,
   deleteProduct,
   checkQuantityProduct,
+  getBrands,
 };
 export default ProductController;

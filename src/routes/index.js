@@ -1,17 +1,18 @@
-import SliderRouter from '../routes/SliderRouter.js';
-import UserRouter from '../routes/UserRouter.js';
-import ProductRouter from '../routes/ProductRouter.js';
-import ShipperRouter from '../routes/ShipperRouter.js';
-import SupplierRouter from '../routes/SupplierRouter.js';
-import ProvinceRouter from '../routes/ProvinceRouter.js';
-import CategoryRouter from '../routes/CategoryRouter.js';
 import AttributeRouter from '../routes/AttributeRouter.js';
-import ProductImageRouter from '../routes/ProductImageRouter.js';
-import VariantRouter from '../routes/VariantRouter.js';
-import OrderStatusRouter from '../routes/OrderStatusRouter.js';
-import InventoryRouter from '../routes/InventoryRouter.js';
+import CategoryRouter from '../routes/CategoryRouter.js';
 import CheckoutRouter from '../routes/CheckoutRouter.js';
+import DashboardRouter from '../routes/DashboardRouter.js';
+import InventoryRouter from '../routes/InventoryRouter.js';
 import OrderRouter from '../routes/OrderRouter.js';
+import OrderStatusRouter from '../routes/OrderStatusRouter.js';
+import ProductImageRouter from '../routes/ProductImageRouter.js';
+import ProductRouter from '../routes/ProductRouter.js';
+import ProvinceRouter from '../routes/ProvinceRouter.js';
+import ShipperRouter from '../routes/ShipperRouter.js';
+import SliderRouter from '../routes/SliderRouter.js';
+import SupplierRouter from '../routes/SupplierRouter.js';
+import UserRouter from '../routes/UserRouter.js';
+import VariantRouter from '../routes/VariantRouter.js';
 
 const routes = (app) => {
   app.use('/api/user', UserRouter);
@@ -28,6 +29,11 @@ const routes = (app) => {
   app.use('/api/inventory', InventoryRouter);
   app.use('/api/checkout', CheckoutRouter);
   app.use('/api/order', OrderRouter);
+  app.use('/api/dashboard', DashboardRouter);
+  app.get('/api/test', (req, res) => {
+    const query = req.query;
+    console.log(query);
+  });
 
   app.get('/', (req, res) => {
     res.json({ name: 'Hi LofA' });
