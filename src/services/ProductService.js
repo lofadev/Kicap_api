@@ -1,6 +1,7 @@
 import ProductImage from '../models/ProductImageModel.js';
 import Product from '../models/ProductModel.js';
 import Variant from '../models/VariantModel.js';
+import Category from '../models/CategoryModel.js';
 import {
   convertToSlug,
   deleteImageFromFirebase,
@@ -65,16 +66,55 @@ const getProduct = (id) => {
   });
 };
 
-const getProducts = (page, limit, search, type) => {
+const getProducts = (payload) => {
   return new Promise(async (resolve, reject) => {
     try {
+      const { page, limit, search, category, sortBy, brand, price, stock } = payload;
       const skip = (page - 1) * limit;
-      let query;
-      if (search && type) query = { name: { $regex: search, $options: 'i' }, category: type };
-      else if (search) query = { name: { $regex: search, $options: 'i' } };
-      else if (type) query = { category: type };
-      const totalProducts = await Product.countDocuments(query);
-      const products = await Product.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit);
+      const [categories, brands] = await Promise.all([Category.find(), Product.find()]);
+
+      const categoryArr = category.length > 0 ? category : categories.map((ct) => ct.categoryName);
+      const categoryQuery = categoryArr.map((ct) => ({ category: ct }));
+
+      const brandArr = brand.length > 0 ? brand : brands.map((br) => br.brand);
+      const brandQuery = brandArr.map((br) => ({ brand: br }));
+
+      let priceQuery = price.map((pr) => {
+        if (pr[0] && pr[1]) {
+          return {
+            price: { $gt: pr[0], $lt: pr[1] },
+          };
+        }
+        return {
+          price: { $gt: pr[0] },
+        };
+      });
+      if (priceQuery.length === 0) priceQuery = [{ price: { $gt: 0 } }];
+
+      const stockQuery = stock ? [{ stock: { $gt: 0 } }] : [{ stock: { $gt: -1 } }];
+
+      let sortByQuery;
+      if (sortBy === 'created_on:desc') sortByQuery = { createdAt: -1 };
+      else if (sortBy === 'alpha:asc') sortByQuery = { name: 1 };
+      else if (sortBy === 'alpha:desc') sortByQuery = { name: -1 };
+      else if (sortBy === 'price:asc') sortByQuery = { price: 1 };
+      else if (sortBy === 'price:desc') sortByQuery = { price: -1 };
+
+      const queryFind = {
+        name: { $regex: search, $options: 'i' },
+        $and: [
+          { $or: categoryQuery },
+          { $or: brandQuery },
+          { $or: priceQuery },
+          { $or: stockQuery },
+        ],
+      };
+      let querySort;
+      // if (search && category) queryFind = { name: { $regex: search, $options: 'i' }, category };
+      // else if (search) queryFind = { name: { $regex: search, $options: 'i' } };
+      // else if (category) queryFind = { category };
+      const totalProducts = await Product.countDocuments(queryFind);
+      const products = await Product.find(queryFind).sort(sortByQuery).skip(skip).limit(limit);
       const totalPage = Math.ceil(totalProducts / limit);
       resolve({
         status: 'OK',

@@ -30,13 +30,38 @@ const getProduct = async (req, res) => {
 
 const getProducts = async (req, res) => {
   try {
-    const { page, limit, search, type, sort } = req.query;
-    const response = await ProductService.getProducts(
-      Number(page || 1),
-      Number(limit || 10),
-      search,
-      type
-    );
+    const { page, limit, search, category, sortBy, brand, price, stock } = req.query;
+    let newPrice = [];
+    if (price) {
+      if (typeof price === 'string') {
+        newPrice.push(price);
+      } else {
+        newPrice = price;
+      }
+      newPrice = newPrice.map((price) => {
+        if (price === '(<100000)') {
+          return [1, 100000];
+        } else if (price === '(>1000000)') {
+          return [1000000];
+        }
+        const priceStrings = price.split(',');
+        const priceNumbers = priceStrings.map((p) => Number(p));
+        return priceNumbers;
+      });
+    }
+
+    const defaultSortby = sortBy ? sortBy : 'created_on:desc';
+    const payload = {
+      page: Number(page || 1),
+      limit: Number(limit || 10),
+      search: search ?? '',
+      category: category ? [category] : [],
+      sortBy: defaultSortby,
+      brand: brand ? [brand] : [],
+      price: price ? newPrice : [],
+      stock,
+    };
+    const response = await ProductService.getProducts(payload);
     return res.status(200).json(response);
   } catch (error) {
     console.log(error);
