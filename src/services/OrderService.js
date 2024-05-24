@@ -126,6 +126,23 @@ const getOrder = (id) => {
   });
 };
 
+const updateOrder = (id, payload) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const updatedOrder = await Order.findByIdAndUpdate(id, payload, { new: true });
+      if (updatedOrder) {
+        resolve({
+          status: 'OK',
+          message: 'Cập nhật order thành công',
+          data: updatedOrder,
+        });
+      }
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
 const deleteOrder = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -164,7 +181,7 @@ const deleteOrder = (id) => {
           ...promiseProduct,
           ...promiseVariant,
         ]);
-      if (deletedOrder && deletedOrderDetail.deletedCount && increaseProduct && increaseVariant) {
+      if (deletedOrder && deletedOrderDetail.deletedCount) {
         return resolve({
           status: 'OK',
           message: 'Đã xoá order thành công',
@@ -180,5 +197,5 @@ const deleteOrder = (id) => {
   });
 };
 
-const OrderService = { createOrder, updateIsPaid, deleteOrder, getAll, getOrder };
+const OrderService = { createOrder, updateIsPaid, deleteOrder, getAll, getOrder, updateOrder };
 export default OrderService;

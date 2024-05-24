@@ -21,7 +21,6 @@ const getRevenue = async (req, res) => {
     year = Number(year);
     const fromDate = new Date(year, month - 1, 1);
     // const toDate = new Date(year, month + 1, 10);
-    console.log(fromDate);
     // console.log(toDate);
     // const params = { month, year };
     // const response = await DashboardService.getRevenue(params);
