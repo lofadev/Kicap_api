@@ -236,6 +236,38 @@ const getBrands = () => {
   });
 };
 
+const getMenu = () => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const categories = await Category.find({});
+      const promiseMenu = categories.map((ct) => {
+        return Product.find({ category: ct.categoryName }).sort({ createdAt: -1 }).limit(3);
+      });
+      const results = await Promise.all(promiseMenu);
+      const menu = results.map((result, index) => {
+        return {
+          id: categories[index]._id,
+          name: categories[index].categoryName,
+          sub_children: result.map((rs) => {
+            return {
+              id: rs._id,
+              name: rs.name,
+              slug: rs.slug,
+            };
+          }),
+        };
+      });
+      resolve({
+        status: 'OK',
+        message: 'Lấy danh sách menu',
+        data: menu,
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
 const ProductService = {
   createProduct,
   getProduct,
@@ -244,5 +276,6 @@ const ProductService = {
   deleteProduct,
   checkQuantityProduct,
   getBrands,
+  getMenu,
 };
 export default ProductService;

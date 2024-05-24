@@ -114,6 +114,16 @@ const getBrands = async (req, res) => {
   }
 };
 
+const getMenu = async (req, res) => {
+  try {
+    const response = await ProductService.getMenu();
+    return res.status(200).json(response);
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json(variable.HAS_ERROR);
+  }
+};
+
 const ProductController = {
   createProduct,
   getProduct,
@@ -122,5 +132,6 @@ const ProductController = {
   deleteProduct,
   checkQuantityProduct,
   getBrands,
+  getMenu,
 };
 export default ProductController;

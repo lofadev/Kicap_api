@@ -66,9 +66,21 @@ const getAll = async (req, res) => {
   }
 };
 
+const getOrder = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const response = await OrderService.getOrder(id);
+    return res.status(response.status === 'OK' ? 200 : 400).json(response);
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json(variable.HAS_ERROR);
+  }
+};
+
 const OrderController = {
   createOrder,
   getAll,
+  getOrder,
 };
 
 export default OrderController;

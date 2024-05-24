@@ -13,6 +13,7 @@ import SliderRouter from '../routes/SliderRouter.js';
 import SupplierRouter from '../routes/SupplierRouter.js';
 import UserRouter from '../routes/UserRouter.js';
 import VariantRouter from '../routes/VariantRouter.js';
+import OrderDetailRouter from '../routes/OrderDetailRouter.js';
 
 const routes = (app) => {
   app.use('/api/user', UserRouter);
@@ -30,10 +31,7 @@ const routes = (app) => {
   app.use('/api/checkout', CheckoutRouter);
   app.use('/api/order', OrderRouter);
   app.use('/api/dashboard', DashboardRouter);
-  app.get('/api/test', (req, res) => {
-    const query = req.query;
-    console.log(query);
-  });
+  app.use('/api/order-detail', OrderDetailRouter);
 
   app.get('/', (req, res) => {
     res.json({ name: 'Hi LofA' });
