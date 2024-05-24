@@ -22,6 +22,7 @@ router.post(
   ProductController.createProduct
 );
 router.get('/get-all', ProductController.getProducts);
+router.get('/get-menu', ProductController.getMenu);
 router.get('/get-brand', ProductController.getBrands);
 router.post('/check-quantity', ProductController.checkQuantityProduct);
 router.put(

@@ -12,6 +12,7 @@ const createOrder = (newOrder) => {
       ]);
       const productIDs = [];
       const variantIDs = [];
+      console.log(newOrder.orderItems);
       if (newOrder.orderItems) {
         newOrder.orderItems.forEach((item) => {
           if (!!item.variant) variantIDs.push({ id: item.productID, quantity: item.quantity });
@@ -104,6 +105,44 @@ const getAll = (payload) => {
   });
 };
 
+const getOrder = (id) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const order = await Order.findById(id);
+      if (!order) {
+        resolve({
+          status: 'ERROR',
+          message: 'Order này không tồn tại.',
+        });
+      }
+      resolve({
+        status: 'OK',
+        message: 'Lấy thông tin chi tiết order.',
+        data: order,
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+const updateOrder = (id, payload) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const updatedOrder = await Order.findByIdAndUpdate(id, payload, { new: true });
+      if (updatedOrder) {
+        resolve({
+          status: 'OK',
+          message: 'Cập nhật order thành công',
+          data: updatedOrder,
+        });
+      }
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
 const deleteOrder = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -142,7 +181,7 @@ const deleteOrder = (id) => {
           ...promiseProduct,
           ...promiseVariant,
         ]);
-      if (deletedOrder && deletedOrderDetail.deletedCount && increaseProduct && increaseVariant) {
+      if (deletedOrder && deletedOrderDetail.deletedCount) {
         return resolve({
           status: 'OK',
           message: 'Đã xoá order thành công',
@@ -158,5 +197,5 @@ const deleteOrder = (id) => {
   });
 };
 
-const OrderService = { createOrder, updateIsPaid, deleteOrder, getAll };
+const OrderService = { createOrder, updateIsPaid, deleteOrder, getAll, getOrder, updateOrder };
 export default OrderService;
