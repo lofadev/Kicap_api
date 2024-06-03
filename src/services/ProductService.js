@@ -66,7 +66,34 @@ const getProduct = (id) => {
   });
 };
 
-const getProducts = (payload) => {
+const getProducts = (page, limit, search, category) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const skip = (page - 1) * limit;
+      let query;
+      if (search && category)
+        query = { name: { $regex: search, $options: 'i' }, category: category };
+      else if (search) query = { name: { $regex: search, $options: 'i' } };
+      else if (category) query = { category: category };
+      const totalProducts = await Product.countDocuments(query);
+      const products = await Product.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit);
+      const totalPage = Math.ceil(totalProducts / limit);
+      resolve({
+        status: 'OK',
+        message: 'Lấy danh sách sản phẩm.',
+        data: products,
+        currentPage: page,
+        totalProducts,
+        totalPage,
+        limit,
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+const getProductsFilter = (payload) => {
   return new Promise(async (resolve, reject) => {
     try {
       const { page, limit, search, category, sortBy, brand, price, stock } = payload;
@@ -109,7 +136,6 @@ const getProducts = (payload) => {
           { $or: stockQuery },
         ],
       };
-      let querySort;
       // if (search && category) queryFind = { name: { $regex: search, $options: 'i' }, category };
       // else if (search) queryFind = { name: { $regex: search, $options: 'i' } };
       // else if (category) queryFind = { category };
@@ -272,6 +298,7 @@ const ProductService = {
   createProduct,
   getProduct,
   getProducts,
+  getProductsFilter,
   updateProduct,
   deleteProduct,
   checkQuantityProduct,

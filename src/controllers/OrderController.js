@@ -66,6 +66,17 @@ const getAll = async (req, res) => {
   }
 };
 
+const getAllByUserID = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const response = await OrderService.getAllByUserID(id);
+    return res.status(response.status === 'OK' ? 200 : 400).json(response);
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json(variable.HAS_ERROR);
+  }
+};
+
 const getOrder = async (req, res) => {
   try {
     const { id } = req.params;
@@ -105,6 +116,7 @@ const OrderController = {
   getOrder,
   deleteOrder,
   updateOrder,
+  getAllByUserID,
 };
 
 export default OrderController;

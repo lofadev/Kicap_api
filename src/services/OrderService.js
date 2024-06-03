@@ -105,6 +105,21 @@ const getAll = (payload) => {
   });
 };
 
+const getAllByUserID = (id) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const orders = await Order.find({ userID: id });
+      resolve({
+        status: 'OK',
+        message: 'Lấy danh sách đơn đặt hàng.',
+        data: orders,
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
 const getOrder = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -197,5 +212,13 @@ const deleteOrder = (id) => {
   });
 };
 
-const OrderService = { createOrder, updateIsPaid, deleteOrder, getAll, getOrder, updateOrder };
+const OrderService = {
+  createOrder,
+  updateIsPaid,
+  deleteOrder,
+  getAll,
+  getOrder,
+  updateOrder,
+  getAllByUserID,
+};
 export default OrderService;
