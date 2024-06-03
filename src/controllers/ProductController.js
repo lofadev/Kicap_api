@@ -30,6 +30,22 @@ const getProduct = async (req, res) => {
 
 const getProducts = async (req, res) => {
   try {
+    const { page, limit, search, category } = req.query;
+    const response = await ProductService.getProducts(
+      Number(page || 1),
+      Number(limit || 10),
+      search,
+      category
+    );
+    return res.status(200).json(response);
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json(variable.HAS_ERROR);
+  }
+};
+
+const getProductsFilter = async (req, res) => {
+  try {
     const { page, limit, search, category, sortBy, brand, price, stock } = req.query;
     let newPrice = [];
     if (price) {
@@ -61,7 +77,7 @@ const getProducts = async (req, res) => {
       price: price ? newPrice : [],
       stock,
     };
-    const response = await ProductService.getProducts(payload);
+    const response = await ProductService.getProductsFilter(payload);
     return res.status(200).json(response);
   } catch (error) {
     console.log(error);
@@ -133,5 +149,6 @@ const ProductController = {
   checkQuantityProduct,
   getBrands,
   getMenu,
+  getProductsFilter,
 };
 export default ProductController;
