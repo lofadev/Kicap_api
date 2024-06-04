@@ -98,8 +98,15 @@ const loginUser = (payload) => {
       if (!user.isVerify) {
         resolve({
           status: 'ERROR',
+          keyError: 'NOT_VERIFY',
           message:
             'Tài khoản của bạn chưa được xác thực. Vui lòng kiểm tra email hoặc nhấn vào nút gửi lại để tiến hành xác thực lại email.',
+        });
+      }
+      if (user.isLocked) {
+        resolve({
+          status: 'ERROR',
+          message: 'Tài khoản của bạn đã bị khoá. Vui lòng liên hệ admin để được hỗ trợ',
         });
       }
       const accessToken = generateAccessToken({
@@ -150,7 +157,7 @@ const getAllUser = (page, limit, search) => {
   });
 };
 
-const getDetailsUser = (id) => {
+const getDetailsUser = (id, isAdmin) => {
   return new Promise(async (resolve, reject) => {
     try {
       const user = await User.findById(id);
@@ -160,7 +167,12 @@ const getDetailsUser = (id) => {
           message: 'User này không tồn tại.',
         });
       }
-
+      if (user.isLocked && !isAdmin) {
+        resolve({
+          status: 'ERROR',
+          message: 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ admin để được hỗ trợ.',
+        });
+      }
       resolve({
         status: 'OK',
         message: 'SUCCESS',

@@ -65,7 +65,7 @@ const createUser = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const userId = req.params.id;
-    const { isAdmin } = req.body;
+    const { isAdmin, ...data } = req.body;
     let response;
     if (res.isAdmin) {
       response = await UserService.updateUser(userId, req.body);
@@ -127,14 +127,15 @@ const getAllUser = async (req, res) => {
 const getDetailsUser = async (req, res) => {
   try {
     const userId = req.params.id;
+    const isAdmin = res.isAdmin;
     if (!userId) {
       return res.status(200).json({
         status: 'ERROR',
         message: 'UserId là bắt buộc.',
       });
     }
-    const response = await UserService.getDetailsUser(userId);
-    return res.status(200).json(response);
+    const response = await UserService.getDetailsUser(userId, isAdmin);
+    return res.status(response.status === 'OK' ? 200 : 400).json(response);
   } catch (error) {
     console.log(error);
     return res.status(400).json(variable.HAS_ERROR);

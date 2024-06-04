@@ -6,7 +6,7 @@ import { validateIdParam } from '../middlewares/validateMiddleware.js';
 const router = Router();
 
 router.post('/create', authMiddleWare, OrderStatusController.createOrderStatus);
-router.get('/get-all', authMiddleWare, OrderStatusController.getOrderStatuss);
+router.get('/get-all', OrderStatusController.getOrderStatuss);
 router.get('/:id', authMiddleWare, validateIdParam, OrderStatusController.getOrderStatus);
 router.put('/update/:id', authMiddleWare, validateIdParam, OrderStatusController.updateOrderStatus);
 router.delete(

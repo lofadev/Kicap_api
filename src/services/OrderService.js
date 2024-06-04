@@ -6,13 +6,13 @@ import Variant from '../models/VariantModel.js';
 const createOrder = (newOrder) => {
   return new Promise(async (resolve, reject) => {
     try {
+      newOrder.orderTime = new Date().toISOString();
       const [order, orderDetails] = await Promise.all([
         Order.create(newOrder),
         OrderDetail.insertMany(newOrder.orderItems),
       ]);
       const productIDs = [];
       const variantIDs = [];
-      console.log(newOrder.orderItems);
       if (newOrder.orderItems) {
         newOrder.orderItems.forEach((item) => {
           if (!!item.variant) variantIDs.push({ id: item.productID, quantity: item.quantity });
@@ -108,7 +108,7 @@ const getAll = (payload) => {
 const getAllByUserID = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const orders = await Order.find({ userID: id });
+      const orders = await Order.find({ userID: id }).sort({ createdAt: -1 });
       resolve({
         status: 'OK',
         message: 'Lấy danh sách đơn đặt hàng.',
@@ -144,6 +144,14 @@ const getOrder = (id) => {
 const updateOrder = (id, payload) => {
   return new Promise(async (resolve, reject) => {
     try {
+      const { status } = payload;
+      if (status === 1) {
+        payload.acceptTime = new Date().toISOString();
+      } else if (status === 3) {
+        payload.shippedTime = new Date().toISOString();
+        payload.finishedTime = new Date().toISOString();
+        payload.isPaid = true;
+      }
       const updatedOrder = await Order.findByIdAndUpdate(id, payload, { new: true });
       if (updatedOrder) {
         resolve({
