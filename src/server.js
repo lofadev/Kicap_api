@@ -11,9 +11,20 @@ const port = process.env.PORT;
 const mongodbUrl = process.env.MONGODB_URL;
 const app = express();
 
+const delay = (time) =>
+  new Promise((resolve) => {
+    setTimeout(resolve, time);
+  });
+
+const midlewareDelay = async (req, res, next) => {
+  await delay(500);
+  next();
+};
+
 app.use(cors());
 app.use(bodyParser.json());
 app.use(cookieParser());
+app.use(midlewareDelay);
 
 try {
   await mongoose.connect(mongodbUrl);
