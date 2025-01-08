@@ -4,10 +4,10 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
 import mongoose from 'mongoose';
-import router from './routes/index.js';
+import router from './src/routes/index.js';
 
 dotenv.config();
-const port = process.env.PORT;
+const port = process.env.PORT || 3000;
 const mongodbUrl = process.env.MONGODB_URL;
 const app = express();
 
