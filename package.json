@@ -8,7 +8,9 @@
   "license": "MIT",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "seed": "node scripts/seed.js",
+    "test": "node --test"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
