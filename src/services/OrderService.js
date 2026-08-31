@@ -53,21 +53,37 @@ const createOrder = (newOrder) => {
   });
 };
 
+// VNPay gọi IPN nhiều lần cho cùng một giao dịch, nên hàm này phải phân biệt được
+// ba trường hợp: vừa cập nhật xong, đã cập nhật từ trước, và không có đơn nào khớp.
+// Mọi nhánh đều phải resolve, bỏ sót một nhánh là Promise treo và IPN không bao giờ
+// trả lời được VNPay.
 const updateIsPaid = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
       const orderIsPaid = await Order.findOneAndUpdate(
-        { orderID: id },
+        { orderID: id, isPaid: false },
         { isPaid: true },
         { new: true }
       );
       if (orderIsPaid) {
-        resolve({
+        return resolve({
           status: 'OK',
           message: 'Đặt hàng thành công.',
           data: orderIsPaid,
         });
       }
+      const alreadyPaid = await Order.findOne({ orderID: id });
+      if (alreadyPaid) {
+        return resolve({
+          status: 'ALREADY_PAID',
+          message: 'Đơn hàng này đã được thanh toán trước đó.',
+          data: alreadyPaid,
+        });
+      }
+      resolve({
+        status: 'NOT_FOUND',
+        message: 'Không tìm thấy đơn hàng tương ứng.',
+      });
     } catch (error) {
       reject(error);
     }

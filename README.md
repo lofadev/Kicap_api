@@ -211,7 +211,11 @@ Order details live at `/api/order-detail`: `GET /details-of-order`, `PUT /update
 
 ### Checkout — `/api/checkout`
 
-`POST /create_payment_url` builds a signed VNPay redirect. `POST /vnpay_ipn` receives the payment notification.
+`POST /create_payment_url` builds a signed VNPay redirect.
+
+`GET /vnpay_ipn` receives the payment notification. VNPay calls it server-to-server over GET and expects a `{ RspCode, Message }` reply; anything else makes it retry. Configure the URL in the sandbox merchant portal — it must be publicly reachable, so VNPay cannot call it while the server runs on localhost.
+
+`POST /vnpay_return` is the browser-facing counterpart. VNPay redirects the customer to `VNP_RETURNURL`, and the client posts those query parameters here. It verifies the signature before reporting the outcome as `{ code, message }`, and applies the same order update as the IPN so local development works without a public URL. Both endpoints are safe to call more than once for the same order.
 
 ### Inventory and dashboard
 
