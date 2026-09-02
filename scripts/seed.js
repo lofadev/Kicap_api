@@ -66,20 +66,24 @@ const seedReference = async () => {
   await Supplier.insertMany(data.suppliers);
 };
 
-const placeholderImageFor = (name, index) => data.placeholderImage(`${name} ${index}`);
-
 // price is the struck-through original; salePrice is what the customer pays
 // (client/src/components/ProductCard/ProductCard.jsx:76-79).
 const applyDiscount = (price, discount) => roundedPrice((price * (100 - discount)) / 100);
 
 const seedCatalog = async () => {
+  // `images` holds the real kicap.vn URLs; it feeds image, more_image and the
+  // ProductImage rows below, and is not a field on ProductModel itself.
+  const imagesByName = new Map(data.products.map((p) => [p.name, p.images]));
+
   const products = await Product.insertMany(
-    data.products.map((p) => ({
+    data.products.map(({ images, ...p }) => ({
       ...p,
       slug: convertToSlug(p.name),
       salePrice: applyDiscount(p.price, p.discount),
-      image: placeholderImageFor(p.name, 1),
-      more_image: placeholderImageFor(p.name, 2),
+      image: images[0],
+      // ProductCard.jsx:68 swaps to more_image on hover; single-image products
+      // simply do not change.
+      more_image: images[1] ?? images[0],
       rating: 0,
     })),
   );
@@ -107,9 +111,9 @@ const seedCatalog = async () => {
 
   await ProductImage.insertMany(
     products.flatMap((p) =>
-      [0, 1, 2].map((order) => ({
+      imagesByName.get(p.name).map((image, order) => ({
         productID: p._id,
-        image: placeholderImageFor(p.name, order + 1),
+        image,
         description: `${p.name} - ảnh ${order + 1}`,
         displayOrder: order,
         isHidden: false,
@@ -119,7 +123,7 @@ const seedCatalog = async () => {
 
   await Slider.insertMany(
     data.sliders.map((s) => ({
-      image: data.placeholderImage(s.label, '1600x600'),
+      image: s.image,
       description: s.description,
       displayOrder: s.displayOrder,
       toProduct: '/products',

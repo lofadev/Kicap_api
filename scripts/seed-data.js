@@ -1,43 +1,43 @@
-// Sample data for local development. Written for this project; nothing here is
-// copied from any live storefront. Brand names are used descriptively.
+// Seed catalogue derived from a snapshot of https://kicap.vn/collections/all.
+//
+// scripts/kicap-catalog.json holds the raw download — refresh it with
+// `npm run fetch:kicap`. Everything exported here is derived from that snapshot
+// deterministically (fixed-seed PRNG, no Date.now, no Math.random), so seeding
+// the same snapshot twice produces identical data.
+//
+// Product images are the storefront's own bizweb.dktcdn.net URLs. Product.image
+// is a plain String, so they sit alongside the Firebase download URLs that
+// uploadImageToFirebase (src/utils/index.js) writes for admin-uploaded products.
+import { readFileSync } from 'node:fs';
 import unidecode from 'unidecode';
 
+const catalog = JSON.parse(readFileSync(new URL('./kicap-catalog.json', import.meta.url), 'utf8'));
+
+// Still used for user avatars and as a last-resort image; kicap.vn has neither.
 export const placeholderImage = (text, size = '600x600') =>
   `https://placehold.co/${size}/1a1a1a/ffffff?text=${encodeURIComponent(unidecode(text))}`;
 
-// The first four names are hardcoded in client/src/pages/Home/Home.jsx:24-27.
-export const categories = [
-  {
-    categoryName: 'Bàn phím cơ',
-    description: 'Bàn phím cơ custom và pre-built, đủ layout từ 60% đến full-size.',
-    image: placeholderImage('Ban phim co'),
-  },
-  {
-    categoryName: 'Keycap bộ',
-    description: 'Bộ keycap PBT và ABS, nhiều profile: Cherry, OSA, MDA, XDA.',
-    image: placeholderImage('Keycap bo'),
-  },
-  {
-    categoryName: 'Switch',
-    description: 'Switch linear, tactile và clicky, bán theo bộ.',
-    image: placeholderImage('Switch'),
-  },
-  {
-    categoryName: 'Phụ kiện',
-    description: 'Cáp xoắn, dụng cụ lube, foam tiêu âm, stabilizer.',
-    image: placeholderImage('Phu kien'),
-  },
-  {
-    categoryName: 'Kê tay',
-    description: 'Kê tay gỗ tự nhiên và da PU, đủ kích thước bàn phím.',
-    image: placeholderImage('Ke tay'),
-  },
-  {
-    categoryName: 'Chuột & Pad',
-    description: 'Deskmat khổ lớn và pad lót chuột.',
-    image: placeholderImage('Chuot va Pad'),
-  },
-];
+const ascii = (value) => unidecode(value ?? '').toLowerCase();
+
+// Stable across machines and Node versions, unlike a hash seeded by insertion order.
+const hashOf = (value) => {
+  let hash = 0;
+  for (let index = 0; index < value.length; index += 1) hash = (Math.imul(hash, 31) + value.charCodeAt(index)) | 0;
+  return Math.abs(hash);
+};
+
+// mulberry32. Same seed, same sequence, every run.
+const createRandom = (seed) => {
+  let state = seed | 0;
+  return () => {
+    state = (state + 0x6d2b79f5) | 0;
+    let t = Math.imul(state ^ (state >>> 15), 1 | state);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+};
+
+// --- Reference data. kicap.vn publishes none of this, so it stays hand-written. ---
 
 export const suppliers = [
   {
@@ -72,12 +72,6 @@ export const suppliers = [
     address: '77 Lý Thường Kiệt, Phường Ngô Quyền',
     province: 'Hải Phòng',
   },
-];
-
-export const attributes = [
-  { name: 'Loại switch', displayOrder: 1 },
-  { name: 'Màu sắc', displayOrder: 2 },
-  { name: 'Layout', displayOrder: 3 },
 ];
 
 // Statuses 0-3 are the live order flow (DetailOrder.jsx, OrderService.updateOrder).
@@ -144,774 +138,6 @@ export const provinces = PROVINCE_NAMES.map((provinceName, index) => ({
   provinceType: CITIES.includes(provinceName) ? 'Thành phố' : 'Tỉnh',
 }));
 
-const KEYBOARD = 'Bàn phím cơ';
-const KEYCAP = 'Keycap bộ';
-const SWITCH = 'Switch';
-const ACCESSORY = 'Phụ kiện';
-const WRISTREST = 'Kê tay';
-const MOUSEPAD = 'Chuột & Pad';
-
-const KICAP_DIST = 'Kicap Distribution';
-const HANOI_SUPPLY = 'Hà Nội Keyboard Supply';
-const DANANG_IMPORT = 'Đà Nẵng Gear Import';
-const SWITCH_HOUSE = 'Switch House Việt Nam';
-
-export const products = [
-  // --- Bàn phím cơ (12) ---
-  {
-    name: 'AKKO 3068B Plus World Tour Tokyo',
-    sku: 'KB-AKK-001',
-    brand: 'AKKO',
-    category: KEYBOARD,
-    supplier: KICAP_DIST,
-    price: 1690000,
-    discount: 10,
-    stock: 24,
-    hasVariant: true,
-    description: 'Bàn phím 65% ba chế độ kết nối, vỏ nhựa ABS, hotswap 5 pin, foam tiêu âm sẵn trong máy.',
-  },
-  {
-    name: 'AKKO MOD007B PC Hiệu Ứng Từ Trường',
-    sku: 'KB-AKK-002',
-    brand: 'AKKO',
-    category: KEYBOARD,
-    supplier: KICAP_DIST,
-    price: 2890000,
-    discount: 0,
-    stock: 12,
-    hasVariant: false,
-    description: 'Layout 75% gasket mount, tấm PC, switch từ trường điều chỉnh được hành trình kích hoạt.',
-  },
-  {
-    name: 'Keychron K8 Pro Vỏ Nhôm',
-    sku: 'KB-KEY-003',
-    brand: 'Keychron',
-    category: KEYBOARD,
-    supplier: HANOI_SUPPLY,
-    price: 3290000,
-    discount: 12,
-    stock: 15,
-    hasVariant: true,
-    description: 'TKL vỏ nhôm nguyên khối, firmware QMK/VIA, pin 4000mAh, hotswap toàn bộ phím.',
-  },
-  {
-    name: 'Keychron V6 Max Có Núm Xoay',
-    sku: 'KB-KEY-004',
-    brand: 'Keychron',
-    category: KEYBOARD,
-    supplier: HANOI_SUPPLY,
-    price: 2790000,
-    discount: 0,
-    stock: 18,
-    hasVariant: true,
-    description: 'Full-size 96% gasket mount, núm xoay nhôm, hai lớp foam, kết nối 2.4GHz và Bluetooth.',
-  },
-  {
-    name: 'Keychron Q1 Pro QMK Bản Nhôm',
-    sku: 'KB-KEY-005',
-    brand: 'Keychron',
-    category: KEYBOARD,
-    supplier: HANOI_SUPPLY,
-    price: 4490000,
-    discount: 8,
-    stock: 8,
-    hasVariant: false,
-    description: 'Custom 75% dựng sẵn, vỏ nhôm CNC 6063, gasket mount, double gasket, PCB hotswap.',
-  },
-  {
-    name: 'Leopold FC660M Bản Xám Than',
-    sku: 'KB-LEO-006',
-    brand: 'Leopold',
-    category: KEYBOARD,
-    supplier: DANANG_IMPORT,
-    price: 2590000,
-    discount: 0,
-    stock: 10,
-    hasVariant: false,
-    description: 'Layout 65% huyền thoại, keycap PBT dye-sub, vỏ dày, gõ chắc tay, không hotswap.',
-  },
-  {
-    name: 'Leopold FC900R Bluetooth',
-    sku: 'KB-LEO-007',
-    brand: 'Leopold',
-    category: KEYBOARD,
-    supplier: DANANG_IMPORT,
-    price: 3190000,
-    discount: 5,
-    stock: 7,
-    hasVariant: false,
-    description: 'Full-size có dây và Bluetooth, keycap PBT, chất lượng hoàn thiện quen thuộc của Leopold.',
-  },
-  {
-    name: 'FL Esports MK750 Ba Chế Độ',
-    sku: 'KB-FLE-008',
-    brand: 'FL Esports',
-    category: KEYBOARD,
-    supplier: KICAP_DIST,
-    price: 1490000,
-    discount: 15,
-    stock: 30,
-    hasVariant: true,
-    description: 'TKL gasket mount tầm giá phổ thông, ba chế độ kết nối, sẵn foam và băng tape mod.',
-  },
-  {
-    name: 'FL Esports CMK87 Gasket',
-    sku: 'KB-FLE-009',
-    brand: 'FL Esports',
-    category: KEYBOARD,
-    supplier: KICAP_DIST,
-    price: 1190000,
-    discount: 0,
-    stock: 26,
-    hasVariant: false,
-    description: 'TKL vỏ nhựa gasket mount, hotswap 5 pin, LED South-facing, hợp để build lần đầu.',
-  },
-  {
-    name: 'Royal Kludge RK84 Pro',
-    sku: 'KB-RKG-010',
-    brand: 'Royal Kludge',
-    category: KEYBOARD,
-    supplier: KICAP_DIST,
-    price: 1290000,
-    discount: 10,
-    stock: 22,
-    hasVariant: true,
-    description: 'Layout 75% ba chế độ, hotswap, đèn RGB, có núm xoay chỉnh âm lượng.',
-  },
-  {
-    name: 'Royal Kludge R65 Từ Trường',
-    sku: 'KB-RKG-011',
-    brand: 'Royal Kludge',
-    category: KEYBOARD,
-    supplier: KICAP_DIST,
-    price: 990000,
-    discount: 0,
-    stock: 20,
-    hasVariant: false,
-    description: 'Bàn phím 65% switch từ trường, tần số quét 8000Hz, chỉnh actuation trong phần mềm.',
-  },
-  {
-    name: 'Monsgeek M1W Bản Đặc Biệt',
-    sku: 'KB-MON-012',
-    brand: 'Monsgeek',
-    category: KEYBOARD,
-    supplier: DANANG_IMPORT,
-    price: 2190000,
-    discount: 7,
-    stock: 11,
-    hasVariant: true,
-    description: 'Custom 75% vỏ nhôm không dây, gasket mount, tấm định vị FR4, hộp đựng đầy đủ.',
-  },
-
-  // --- Keycap bộ (8) ---
-  {
-    name: 'Keycap AKKO Black & Pink Profile ASA',
-    sku: 'KC-AKK-013',
-    brand: 'AKKO',
-    category: KEYCAP,
-    supplier: KICAP_DIST,
-    price: 890000,
-    discount: 0,
-    stock: 40,
-    hasVariant: false,
-    description: 'Bộ 158 phím PBT dye-sub profile ASA, phối đen hồng, hợp layout từ 60% đến full-size.',
-  },
-  {
-    name: 'Keycap AKKO Matcha Red Bean',
-    sku: 'KC-AKK-014',
-    brand: 'AKKO',
-    category: KEYCAP,
-    supplier: KICAP_DIST,
-    price: 790000,
-    discount: 10,
-    stock: 35,
-    hasVariant: false,
-    description: 'Bộ 157 phím PBT profile Cherry, tông xanh matcha và đỏ đậu, in dye-sub bền màu.',
-  },
-  {
-    name: 'Keycap AKKO Ocean Star Profile Cherry',
-    sku: 'KC-AKK-015',
-    brand: 'AKKO',
-    category: KEYCAP,
-    supplier: KICAP_DIST,
-    price: 950000,
-    discount: 0,
-    stock: 28,
-    hasVariant: false,
-    description: 'Bộ 155 phím PBT dye-sub, tông xanh biển và trắng, có sẵn phím phụ cho layout lẻ.',
-  },
-  {
-    name: 'Keycap Monsgeek Cherry Trắng Xám',
-    sku: 'KC-MON-016',
-    brand: 'Monsgeek',
-    category: KEYCAP,
-    supplier: DANANG_IMPORT,
-    price: 690000,
-    discount: 5,
-    stock: 33,
-    hasVariant: true,
-    description: 'Bộ 140 phím PBT profile Cherry, phối trắng xám tối giản, độ dày thành 1.4mm.',
-  },
-  {
-    name: 'Keycap Keychron OSA PBT Full Set',
-    sku: 'KC-KEY-017',
-    brand: 'Keychron',
-    category: KEYCAP,
-    supplier: HANOI_SUPPLY,
-    price: 1250000,
-    discount: 0,
-    stock: 19,
-    hasVariant: false,
-    description: 'Bộ 219 phím profile OSA, hỗ trợ cả layout Mac và Windows, in dye-sub.',
-  },
-  {
-    name: 'Keycap FL Esports SA Sương Mai',
-    sku: 'KC-FLE-018',
-    brand: 'FL Esports',
-    category: KEYCAP,
-    supplier: KICAP_DIST,
-    price: 550000,
-    discount: 12,
-    stock: 44,
-    hasVariant: false,
-    description: 'Bộ 129 phím profile SA cao, tông pastel xám xanh, chất liệu PBT.',
-  },
-  {
-    name: 'Keycap AKKO MDA Wabi-Sabi',
-    sku: 'KC-AKK-019',
-    brand: 'AKKO',
-    category: KEYCAP,
-    supplier: KICAP_DIST,
-    price: 1150000,
-    discount: 0,
-    stock: 16,
-    hasVariant: true,
-    description: 'Bộ 229 phím profile MDA lấy cảm hứng mỹ học Nhật Bản, PBT dye-sub năm mặt.',
-  },
-  {
-    name: 'Keycap Royal Kludge XDA Pastel',
-    sku: 'KC-RKG-020',
-    brand: 'Royal Kludge',
-    category: KEYCAP,
-    supplier: KICAP_DIST,
-    price: 420000,
-    discount: 8,
-    stock: 50,
-    hasVariant: false,
-    description: 'Bộ 126 phím profile XDA phẳng, tông pastel, giá dễ tiếp cận cho bản build đầu tiên.',
-  },
-
-  // --- Switch (8) ---
-  {
-    name: 'Switch Gateron Yellow Pro (bộ 70)',
-    sku: 'SW-GAT-021',
-    brand: 'Gateron',
-    category: SWITCH,
-    supplier: SWITCH_HOUSE,
-    price: 350000,
-    discount: 0,
-    stock: 60,
-    hasVariant: true,
-    description: 'Switch linear đã lube sẵn từ nhà máy, lực nhấn 50g, hành trình mượt, giá tốt.',
-  },
-  {
-    name: 'Switch Gateron Oil King (bộ 70)',
-    sku: 'SW-GAT-022',
-    brand: 'Gateron',
-    category: SWITCH,
-    supplier: SWITCH_HOUSE,
-    price: 620000,
-    discount: 5,
-    stock: 38,
-    hasVariant: false,
-    description: 'Linear cao cấp vỏ đen nhám, lực nhấn 55g, âm gõ trầm và đầm, lube sẵn.',
-  },
-  {
-    name: 'Switch Gateron Baby Kangaroo (bộ 70)',
-    sku: 'SW-GAT-023',
-    brand: 'Gateron',
-    category: SWITCH,
-    supplier: SWITCH_HOUSE,
-    price: 590000,
-    discount: 0,
-    stock: 30,
-    hasVariant: false,
-    description: 'Tactile bump rõ ở đầu hành trình, lực nhấn 67g, phản hồi dứt khoát.',
-  },
-  {
-    name: 'Switch Kailh Box Jade (bộ 70)',
-    sku: 'SW-KAI-024',
-    brand: 'Kailh',
-    category: SWITCH,
-    supplier: SWITCH_HOUSE,
-    price: 480000,
-    discount: 10,
-    stock: 25,
-    hasVariant: false,
-    description: 'Clicky click bar, tiếng lách cách vang và sắc, vỏ box chống bụi chống nước.',
-  },
-  {
-    name: 'Switch Kailh Box White V2 (bộ 70)',
-    sku: 'SW-KAI-025',
-    brand: 'Kailh',
-    category: SWITCH,
-    supplier: SWITCH_HOUSE,
-    price: 380000,
-    discount: 0,
-    stock: 42,
-    hasVariant: false,
-    description: 'Clicky bản cải tiến, lực nhấn 45g, nhẹ tay hơn Box Jade, độ ổn định cao.',
-  },
-  {
-    name: 'Switch AKKO CS Jelly Purple (bộ 45)',
-    sku: 'SW-AKK-026',
-    brand: 'AKKO',
-    category: SWITCH,
-    supplier: KICAP_DIST,
-    price: 250000,
-    discount: 0,
-    stock: 55,
-    hasVariant: true,
-    description: 'Linear vỏ trong, lực nhấn 45g, êm và nhẹ, hợp gõ văn bản thời gian dài.',
-  },
-  {
-    name: 'Switch AKKO CS Lavender Purple (bộ 45)',
-    sku: 'SW-AKK-027',
-    brand: 'AKKO',
-    category: SWITCH,
-    supplier: KICAP_DIST,
-    price: 280000,
-    discount: 8,
-    stock: 47,
-    hasVariant: false,
-    description: 'Tactile bump nhẹ, lực nhấn 50g, cân bằng giữa cảm giác phản hồi và độ êm.',
-  },
-  {
-    name: 'Switch Monsgeek Sunset Linear (bộ 70)',
-    sku: 'SW-MON-028',
-    brand: 'Monsgeek',
-    category: SWITCH,
-    supplier: DANANG_IMPORT,
-    price: 450000,
-    discount: 0,
-    stock: 29,
-    hasVariant: false,
-    description: 'Linear lube sẵn, lò xo dài 22mm, lực nhấn 63g, âm gõ thiên trầm.',
-  },
-
-  // --- Phụ kiện (6) ---
-  {
-    name: 'Cáp Xoắn Aviator USB-C Đen Bạc',
-    sku: 'PK-KIC-029',
-    brand: 'Kicap',
-    category: ACCESSORY,
-    supplier: KICAP_DIST,
-    price: 320000,
-    discount: 0,
-    stock: 45,
-    hasVariant: false,
-    description: 'Cáp xoắn bọc dù dài 1.5m, đầu nối aviator tháo rời, tương thích mọi bàn phím USB-C.',
-  },
-  {
-    name: 'Bộ Dụng Cụ Lube Switch 12 Món',
-    sku: 'PK-KIC-030',
-    brand: 'Kicap',
-    category: ACCESSORY,
-    supplier: KICAP_DIST,
-    price: 290000,
-    discount: 10,
-    stock: 32,
-    hasVariant: false,
-    description: 'Gồm kẹp tách switch, cọ lube, khay giữ, nhíp và trạm chứa, đủ cho một lần build.',
-  },
-  {
-    name: 'Dầu Lube Krytox 205g0 5ml',
-    sku: 'PK-KIC-031',
-    brand: 'Kicap',
-    category: ACCESSORY,
-    supplier: SWITCH_HOUSE,
-    price: 180000,
-    discount: 0,
-    stock: 58,
-    hasVariant: false,
-    description: 'Mỡ lube tiêu chuẩn cho switch linear, lượng 5ml đủ cho khoảng 90 switch.',
-  },
-  {
-    name: 'Foam Tiêu Âm Poron 3mm',
-    sku: 'PK-KIC-032',
-    brand: 'Kicap',
-    category: ACCESSORY,
-    supplier: KICAP_DIST,
-    price: 120000,
-    discount: 0,
-    stock: 64,
-    hasVariant: false,
-    description: 'Tấm foam Poron cắt sẵn theo layout, giảm tiếng vọng trong khoang bàn phím.',
-  },
-  {
-    name: 'Bộ Stabilizer Durock V2 Plate Mount',
-    sku: 'PK-KIC-033',
-    brand: 'Kicap',
-    category: ACCESSORY,
-    supplier: SWITCH_HOUSE,
-    price: 350000,
-    discount: 5,
-    stock: 27,
-    hasVariant: false,
-    description: 'Stab plate mount vỏ trong, đã cắt gọt sẵn, giảm rung phím dài đáng kể.',
-  },
-  {
-    name: 'Hộp Đựng Switch 100 Ngăn',
-    sku: 'PK-KIC-034',
-    brand: 'Kicap',
-    category: ACCESSORY,
-    supplier: KICAP_DIST,
-    price: 95000,
-    discount: 0,
-    stock: 70,
-    hasVariant: false,
-    description: 'Hộp nhựa trong 100 ngăn có nắp, phân loại switch theo loại và lực nhấn.',
-  },
-
-  // --- Kê tay (3) ---
-  {
-    name: 'Kê Tay Gỗ Óc Chó Full-size',
-    sku: 'KT-KIC-035',
-    brand: 'Kicap',
-    category: WRISTREST,
-    supplier: DANANG_IMPORT,
-    price: 450000,
-    discount: 0,
-    stock: 18,
-    hasVariant: true,
-    description: 'Kê tay gỗ óc chó nguyên khối, phủ dầu tự nhiên, chống trượt bằng đế cao su.',
-  },
-  {
-    name: 'Kê Tay Gỗ Cao Su TKL',
-    sku: 'KT-KIC-036',
-    brand: 'Kicap',
-    category: WRISTREST,
-    supplier: DANANG_IMPORT,
-    price: 320000,
-    discount: 8,
-    stock: 23,
-    hasVariant: true,
-    description: 'Kê tay gỗ cao su dài 36cm cho bàn phím TKL, cạnh bo tròn, hoàn thiện mịn.',
-  },
-  {
-    name: 'Kê Tay Da PU Cho Layout 65%',
-    sku: 'KT-KIC-037',
-    brand: 'Kicap',
-    category: WRISTREST,
-    supplier: KICAP_DIST,
-    price: 190000,
-    discount: 0,
-    stock: 36,
-    hasVariant: false,
-    description: 'Kê tay bọc da PU, lõi memory foam, dài 30cm, dễ lau chùi.',
-  },
-
-  // --- Chuột & Pad (3) ---
-  {
-    name: 'Deskmat Kicap Tokyo Night 900x400',
-    sku: 'MP-KIC-038',
-    brand: 'Kicap',
-    category: MOUSEPAD,
-    supplier: KICAP_DIST,
-    price: 280000,
-    discount: 0,
-    stock: 41,
-    hasVariant: false,
-    description: 'Deskmat khổ lớn 900x400mm, mặt vải dệt mịn, viền may chắc, đế cao su chống trượt.',
-  },
-  {
-    name: 'Deskmat Kicap Matcha 800x300',
-    sku: 'MP-KIC-039',
-    brand: 'Kicap',
-    category: MOUSEPAD,
-    supplier: KICAP_DIST,
-    price: 240000,
-    discount: 10,
-    stock: 39,
-    hasVariant: false,
-    description: 'Deskmat 800x300mm tông xanh matcha, dày 4mm, hợp bàn làm việc cỡ vừa.',
-  },
-  {
-    name: 'Pad Lót Chuột Tròn Kicap Mini',
-    sku: 'MP-KIC-040',
-    brand: 'Kicap',
-    category: MOUSEPAD,
-    supplier: KICAP_DIST,
-    price: 90000,
-    discount: 0,
-    stock: 75,
-    hasVariant: false,
-    description: 'Pad tròn đường kính 22cm, mặt vải tốc độ, phù hợp không gian bàn nhỏ.',
-  },
-];
-
-// 12 products carry variants. priceDelta is added to the parent product's price.
-export const variants = [
-  // 6 keyboards x 3 switch options
-  {
-    product: 'AKKO 3068B Plus World Tour Tokyo',
-    name: 'Loại switch',
-    value: 'AKKO CS Jelly Purple',
-    sku: 'KB-AKK-001-V1',
-    priceDelta: 0,
-    stock: 10,
-  },
-  {
-    product: 'AKKO 3068B Plus World Tour Tokyo',
-    name: 'Loại switch',
-    value: 'AKKO CS Lavender Purple',
-    sku: 'KB-AKK-001-V2',
-    priceDelta: 50000,
-    stock: 8,
-  },
-  {
-    product: 'AKKO 3068B Plus World Tour Tokyo',
-    name: 'Loại switch',
-    value: 'Gateron Yellow Pro',
-    sku: 'KB-AKK-001-V3',
-    priceDelta: 80000,
-    stock: 6,
-  },
-  {
-    product: 'Keychron K8 Pro Vỏ Nhôm',
-    name: 'Loại switch',
-    value: 'Gateron Yellow Pro',
-    sku: 'KB-KEY-003-V1',
-    priceDelta: 0,
-    stock: 6,
-  },
-  {
-    product: 'Keychron K8 Pro Vỏ Nhôm',
-    name: 'Loại switch',
-    value: 'Gateron Baby Kangaroo',
-    sku: 'KB-KEY-003-V2',
-    priceDelta: 120000,
-    stock: 5,
-  },
-  {
-    product: 'Keychron K8 Pro Vỏ Nhôm',
-    name: 'Loại switch',
-    value: 'Kailh Box White V2',
-    sku: 'KB-KEY-003-V3',
-    priceDelta: 60000,
-    stock: 4,
-  },
-  {
-    product: 'Keychron V6 Max Có Núm Xoay',
-    name: 'Loại switch',
-    value: 'Gateron Yellow Pro',
-    sku: 'KB-KEY-004-V1',
-    priceDelta: 0,
-    stock: 8,
-  },
-  {
-    product: 'Keychron V6 Max Có Núm Xoay',
-    name: 'Loại switch',
-    value: 'Gateron Oil King',
-    sku: 'KB-KEY-004-V2',
-    priceDelta: 150000,
-    stock: 6,
-  },
-  {
-    product: 'Keychron V6 Max Có Núm Xoay',
-    name: 'Loại switch',
-    value: 'Gateron Baby Kangaroo',
-    sku: 'KB-KEY-004-V3',
-    priceDelta: 130000,
-    stock: 4,
-  },
-  {
-    product: 'FL Esports MK750 Ba Chế Độ',
-    name: 'Loại switch',
-    value: 'Gateron Yellow Pro',
-    sku: 'KB-FLE-008-V1',
-    priceDelta: 0,
-    stock: 12,
-  },
-  {
-    product: 'FL Esports MK750 Ba Chế Độ',
-    name: 'Loại switch',
-    value: 'Kailh Box Jade',
-    sku: 'KB-FLE-008-V2',
-    priceDelta: 90000,
-    stock: 10,
-  },
-  {
-    product: 'FL Esports MK750 Ba Chế Độ',
-    name: 'Loại switch',
-    value: 'Monsgeek Sunset Linear',
-    sku: 'KB-FLE-008-V3',
-    priceDelta: 70000,
-    stock: 8,
-  },
-  {
-    product: 'Royal Kludge RK84 Pro',
-    name: 'Loại switch',
-    value: 'AKKO CS Jelly Purple',
-    sku: 'KB-RKG-010-V1',
-    priceDelta: 0,
-    stock: 9,
-  },
-  {
-    product: 'Royal Kludge RK84 Pro',
-    name: 'Loại switch',
-    value: 'Gateron Yellow Pro',
-    sku: 'KB-RKG-010-V2',
-    priceDelta: 60000,
-    stock: 7,
-  },
-  {
-    product: 'Royal Kludge RK84 Pro',
-    name: 'Loại switch',
-    value: 'Kailh Box White V2',
-    sku: 'KB-RKG-010-V3',
-    priceDelta: 50000,
-    stock: 6,
-  },
-  {
-    product: 'Monsgeek M1W Bản Đặc Biệt',
-    name: 'Loại switch',
-    value: 'Gateron Oil King',
-    sku: 'KB-MON-012-V1',
-    priceDelta: 0,
-    stock: 5,
-  },
-  {
-    product: 'Monsgeek M1W Bản Đặc Biệt',
-    name: 'Loại switch',
-    value: 'Monsgeek Sunset Linear',
-    sku: 'KB-MON-012-V2',
-    priceDelta: -40000,
-    stock: 4,
-  },
-  {
-    product: 'Monsgeek M1W Bản Đặc Biệt',
-    name: 'Loại switch',
-    value: 'Gateron Baby Kangaroo',
-    sku: 'KB-MON-012-V3',
-    priceDelta: 20000,
-    stock: 2,
-  },
-
-  // 2 keycap sets x 2 colours
-  {
-    product: 'Keycap Monsgeek Cherry Trắng Xám',
-    name: 'Màu sắc',
-    value: 'Trắng xám',
-    sku: 'KC-MON-016-V1',
-    priceDelta: 0,
-    stock: 18,
-  },
-  {
-    product: 'Keycap Monsgeek Cherry Trắng Xám',
-    name: 'Màu sắc',
-    value: 'Đen xám',
-    sku: 'KC-MON-016-V2',
-    priceDelta: 0,
-    stock: 15,
-  },
-  {
-    product: 'Keycap AKKO MDA Wabi-Sabi',
-    name: 'Màu sắc',
-    value: 'Bản đầy đủ 229 phím',
-    sku: 'KC-AKK-019-V1',
-    priceDelta: 0,
-    stock: 9,
-  },
-  {
-    product: 'Keycap AKKO MDA Wabi-Sabi',
-    name: 'Màu sắc',
-    value: 'Bản rút gọn 129 phím',
-    sku: 'KC-AKK-019-V2',
-    priceDelta: -350000,
-    stock: 7,
-  },
-
-  // 2 switch packs x 2 colours
-  {
-    product: 'Switch Gateron Yellow Pro (bộ 70)',
-    name: 'Màu sắc',
-    value: 'Vàng trong',
-    sku: 'SW-GAT-021-V1',
-    priceDelta: 0,
-    stock: 32,
-  },
-  {
-    product: 'Switch Gateron Yellow Pro (bộ 70)',
-    name: 'Màu sắc',
-    value: 'Vàng đục',
-    sku: 'SW-GAT-021-V2',
-    priceDelta: 20000,
-    stock: 28,
-  },
-  {
-    product: 'Switch AKKO CS Jelly Purple (bộ 45)',
-    name: 'Màu sắc',
-    value: 'Tím trong',
-    sku: 'SW-AKK-026-V1',
-    priceDelta: 0,
-    stock: 30,
-  },
-  {
-    product: 'Switch AKKO CS Jelly Purple (bộ 45)',
-    name: 'Màu sắc',
-    value: 'Tím khói',
-    sku: 'SW-AKK-026-V2',
-    priceDelta: 15000,
-    stock: 25,
-  },
-
-  // 2 wrist rests x 2 layouts
-  {
-    product: 'Kê Tay Gỗ Óc Chó Full-size',
-    name: 'Layout',
-    value: 'Full-size 44cm',
-    sku: 'KT-KIC-035-V1',
-    priceDelta: 0,
-    stock: 10,
-  },
-  {
-    product: 'Kê Tay Gỗ Óc Chó Full-size',
-    name: 'Layout',
-    value: 'TKL 36cm',
-    sku: 'KT-KIC-035-V2',
-    priceDelta: -60000,
-    stock: 8,
-  },
-  {
-    product: 'Kê Tay Gỗ Cao Su TKL',
-    name: 'Layout',
-    value: 'TKL 36cm',
-    sku: 'KT-KIC-036-V1',
-    priceDelta: 0,
-    stock: 13,
-  },
-  {
-    product: 'Kê Tay Gỗ Cao Su TKL',
-    name: 'Layout',
-    value: '65% 30cm',
-    sku: 'KT-KIC-036-V2',
-    priceDelta: -50000,
-    stock: 10,
-  },
-];
-
-// toProduct is set to '/products' in seed.js. It must NOT point at a product
-// detail URL: HeroSlider.jsx:41 renders a plain <Link>, and
-// ProductDetails.jsx:27 reads location.state.id unguarded, so arriving without
-// router state throws a TypeError.
-export const sliders = [
-  { label: 'Ban phim co custom', description: 'Bàn phím cơ custom — dựng sẵn, gõ là mê', displayOrder: 0 },
-  { label: 'Keycap moi ve', description: 'Bộ keycap mới về — PBT dye-sub nhiều profile', displayOrder: 1 },
-  { label: 'Switch lube san', description: 'Switch lube sẵn — mượt ngay khi lắp', displayOrder: 2 },
-  { label: 'Phu kien build phim', description: 'Phụ kiện build phím — đủ đồ cho lần đầu', displayOrder: 3 },
-];
-
 // Plaintext here; seed.js hashes with bcrypt.hashSync(pw, 10), matching
 // UserService.createUser. isVerify is forced true in seed.js so these accounts
 // can log in without a configured mailer.
@@ -963,555 +189,433 @@ export const users = [
   },
 ];
 
+// --- Catalogue, derived from the kicap.vn snapshot ---
+
+// The first four names are hardcoded in client/src/pages/Home/Home.jsx:24-27.
+const KEYBOARD = 'Bàn phím cơ';
+const KEYCAP = 'Keycap bộ';
+const SWITCH = 'Switch';
+const ACCESSORY = 'Phụ kiện';
+const WRISTREST = 'Kê tay';
+const MOUSEPAD = 'Chuột & Pad';
+
+const CATEGORY_DESCRIPTIONS = {
+  [KEYBOARD]: 'Bàn phím cơ custom và pre-built, đủ layout từ 60% đến full-size.',
+  [KEYCAP]: 'Bộ keycap PBT và ABS, nhiều profile: Cherry, OSA, MDA, XDA.',
+  [SWITCH]: 'Switch linear, tactile và clicky, bán theo bộ.',
+  [ACCESSORY]: 'Cáp xoắn, dụng cụ lube, foam tiêu âm, stabilizer.',
+  [WRISTREST]: 'Kê tay gỗ tự nhiên và da PU, đủ kích thước bàn phím.',
+  [MOUSEPAD]: 'Deskmat khổ lớn, pad lót chuột và chuột chơi game.',
+};
+
+// How many products each category contributes. Sized to the snapshot: keycaps
+// and keyboards dominate the real storefront, wrist rests barely exist.
+const CATEGORY_QUOTAS = [
+  [KEYBOARD, 20],
+  [KEYCAP, 22],
+  [SWITCH, 16],
+  [ACCESSORY, 12],
+  [WRISTREST, 3],
+  [MOUSEPAD, 8],
+];
+
+// Bizweb's product_type is set on 323 of the 437 products and is authoritative
+// where present; the rest are classified by name.
+const TYPE_MAP = {
+  'ban phim co': KEYBOARD,
+  kit: KEYBOARD,
+  combo: KEYBOARD,
+  '75%': KEYBOARD,
+  '98%': KEYBOARD,
+  fullsize: KEYBOARD,
+  'keycap bo': KEYCAP,
+  switch: SWITCH,
+  'phu kien': ACCESSORY,
+  'phu kien ban phim': ACCESSORY,
+  'custom cable': ACCESSORY,
+  mods: ACCESSORY,
+  den: ACCESSORY,
+  'chuot may tinh': MOUSEPAD,
+};
+
+// The storefront files wrist rests and deskmats under generic types, so these
+// three run before TYPE_MAP; the rest run after it as the fallback for
+// product_type: null.
+const SPECIFIC_NAME_RULES = [
+  [/ke tay|wrist rest/, WRISTREST],
+  [/deskmat|desk mat|lot chuot|pad chuot|mousepad|mouse pad/, MOUSEPAD],
+  [/\bchuot\b/, MOUSEPAD],
+];
+
+const FALLBACK_NAME_RULES = [
+  [/keycap/, KEYCAP],
+  [/\b(switch|swich|switxh|swtich|swicth)\b/, SWITCH],
+  [/ban phim|keyboard|\bkit\b/, KEYBOARD],
+  [/\bcap\b|cable|tui dung|hop dung|foam|lube|stab|\bmod\b|tape|choi ve sinh/, ACCESSORY],
+];
+
+// Artisan / single keycaps are a real storefront type but not a seeded category.
+const EXCLUDED = /keycap le|artisan/;
+
+const categoryOf = (product) => {
+  const name = ascii(product.name);
+  if (EXCLUDED.test(name) || ascii(product.productType) === 'keycap le') return null;
+
+  for (const [pattern, category] of SPECIFIC_NAME_RULES) if (pattern.test(name)) return category;
+
+  const byType = TYPE_MAP[ascii(product.productType)];
+  if (byType) return byType;
+
+  for (const [pattern, category] of FALLBACK_NAME_RULES) if (pattern.test(name)) return category;
+  return null;
+};
+
+// 63 products have no vendor. Matching the name against the vendors that do
+// appear beats guessing at a word, and Kicap is the shop's own house brand.
+const HOUSE_BRAND = 'Kicap';
+const KNOWN_BRANDS = [...new Set(catalog.products.map((p) => p.vendor).filter(Boolean))].sort(
+  (a, b) => b.length - a.length,
+);
+
+const brandOf = (product) => {
+  if (product.vendor) return product.vendor;
+  const haystack = ` ${ascii(product.name)} `;
+  return KNOWN_BRANDS.find((brand) => haystack.includes(` ${ascii(brand)} `)) ?? HOUSE_BRAND;
+};
+
+// ProductDetails.jsx:110 encodes a chosen variant as `${name}/${value}` and
+// seed.js splits it on the first slash, so neither half may contain one.
+// Bizweb joins multi-option titles with " / ", and one option is named
+// "Alpha/Number".
+const withoutSlash = (value) => value.replace(/\s*\/\s*/g, ' · ');
+
+// Bizweb names the option "Title" with a single "Default Title" value when a
+// product has no real variants.
+const attributeNameOf = (product) => {
+  const name = (product.options[0] ?? '').trim();
+  return name && ascii(name) !== 'title' ? withoutSlash(name) : '';
+};
+
+// compare_at_price is the struck-through original; price is what the customer
+// pays. ProductModel stores the original in `price` and seed.js derives
+// salePrice from the percentage, so the percentage is what gets stored.
+const MAX_DISCOUNT = 70;
+
+const pricingOf = (product) => {
+  const paid = Math.round(product.price);
+  const listed = Math.round(product.compareAtPrice);
+  if (listed <= paid || paid <= 0) return { price: paid, discount: 0 };
+  return { price: listed, discount: Math.min(MAX_DISCOUNT, Math.round(((listed - paid) / listed) * 100)) };
+};
+
+// Only 109 of 437 products are in stock on the live site. A dev database of
+// mostly sold-out products is useless, so anything at zero gets a deterministic
+// 5-30 instead. This is the one product field that is not the real value.
+const fallbackStock = (key) => 5 + (hashOf(key) % 26);
+
+const stockOf = (product) => {
+  const fromVariants = product.variants.reduce((total, variant) => total + Math.max(variant.stock ?? 0, 0), 0);
+  return fromVariants > 0 ? fromVariants : fallbackStock(product.name);
+};
+
+// Prefer products that are in stock, carry a full set of images and have real
+// variants — they exercise more of the app. Name breaks ties so the selection
+// never depends on the snapshot's ordering.
+const rankOf = (product) =>
+  (product.available ? 4 : 0) + (product.images.length >= 3 ? 2 : 0) + (product.variants.length > 1 ? 1 : 0);
+
+const selectSources = () => {
+  const pools = new Map(CATEGORY_QUOTAS.map(([category]) => [category, []]));
+
+  for (const product of catalog.products) {
+    // ProductModel requires an image and Bizweb has one product without any.
+    if (product.images.length === 0) continue;
+    const category = categoryOf(product);
+    if (category) pools.get(category).push(product);
+  }
+
+  return CATEGORY_QUOTAS.flatMap(([category, quota]) =>
+    pools
+      .get(category)
+      .sort((a, b) => rankOf(b) - rankOf(a) || ascii(a.name).localeCompare(ascii(b.name)))
+      .slice(0, quota)
+      .map((source) => ({ source, category })),
+  );
+};
+
+const selected = selectSources();
+
+// The storefront spells the same option both "Phân loại" and "Phân Loại".
+// Attribute.name is unique, so one spelling wins and every variant must use it.
+const canonicalAttributeNames = new Map();
+for (const { source } of selected) {
+  const name = attributeNameOf(source);
+  if (name && !canonicalAttributeNames.has(ascii(name))) canonicalAttributeNames.set(ascii(name), name);
+}
+
+const attributeOf = (product) => canonicalAttributeNames.get(ascii(attributeNameOf(product))) ?? '';
+
+const skuOf = (product) => product.variants[0]?.sku?.trim() || `KIC-${product.id}`;
+
+export const products = selected.map(({ source, category }) => {
+  const { price, discount } = pricingOf(source);
+  const brand = brandOf(source);
+  return {
+    name: source.name,
+    sku: skuOf(source),
+    brand,
+    category,
+    supplier: suppliers[hashOf(brand) % suppliers.length].name,
+    price,
+    discount,
+    stock: stockOf(source),
+    hasVariant: Boolean(attributeNameOf(source)) && source.variants.length > 1,
+    description: source.description || `${source.name} — hàng phân phối chính hãng tại Kicap.`,
+    // Real storefront URLs. seed.js takes [0] as image, [1] as more_image and
+    // seeds one ProductImage row per entry.
+    images: source.images,
+  };
+});
+
+const productByName = new Map(products.map((product) => [product.name, product]));
+
+// priceDelta is added to the parent product's price in seed.js, which then
+// re-applies the parent discount. Bizweb gives the variant's paid price, so it
+// is converted back to a struck-through price first, rounded to the nearest
+// thousand the way roundedPrice does for salePrice.
+const listedFrom = (paid, discount) =>
+  discount > 0 ? Math.round(paid / (1 - discount / 100) / 1000) * 1000 : paid;
+
+export const variants = selected.flatMap(({ source }) => {
+  const parent = productByName.get(source.name);
+  if (!parent.hasVariant) return [];
+
+  const name = attributeOf(source);
+  const seen = new Set();
+
+  return source.variants.flatMap((variant, index) => {
+    const raw = (source.options.length > 1 ? variant.title : variant.option1) || variant.title || '';
+    const value = withoutSlash(raw.trim()) || `Phiên bản ${index + 1}`;
+    if (seen.has(value)) return [];
+    seen.add(value);
+
+    return [
+      {
+        product: parent.name,
+        name,
+        value,
+        sku: variant.sku?.trim() || `${parent.sku}-V${index + 1}`,
+        priceDelta: listedFrom(Math.round(variant.price), parent.discount) - parent.price,
+        stock: Math.max(variant.stock ?? 0, 0) || fallbackStock(`${parent.name}#${index}`),
+      },
+    ];
+  });
+});
+
+// Only the option names the selected products actually use, so the admin
+// variant form offers nothing that leads nowhere.
+export const attributes = [...new Set(variants.map((variant) => variant.name))]
+  .sort((a, b) => ascii(a).localeCompare(ascii(b)))
+  .map((name, index) => ({ name, displayOrder: index + 1 }));
+
+const leadImageOf = (category) => products.find((product) => product.category === category).images[0];
+
+export const categories = CATEGORY_QUOTAS.map(([categoryName]) => ({
+  categoryName,
+  description: CATEGORY_DESCRIPTIONS[categoryName],
+  image: leadImageOf(categoryName),
+}));
+
+// toProduct is set to '/products' in seed.js. It must NOT point at a product
+// detail URL: HeroSlider.jsx:41 renders a plain <Link>, and
+// ProductDetails.jsx:27 reads location.state.id unguarded, so arriving without
+// router state throws a TypeError.
+export const sliders = [
+  [KEYBOARD, 'Bàn phím cơ custom — dựng sẵn, gõ là mê'],
+  [KEYCAP, 'Bộ keycap mới về — PBT dye-sub nhiều profile'],
+  [SWITCH, 'Switch lube sẵn — mượt ngay khi lắp'],
+  [ACCESSORY, 'Phụ kiện build phím — đủ đồ cho lần đầu'],
+].map(([category, description], displayOrder) => ({
+  image: leadImageOf(category),
+  description,
+  displayOrder,
+}));
+
+// --- Orders and reviews. Generated, because kicap.vn publishes neither. ---
+
 // variant format is `${attributeName}/${value}`, matching
 // client/src/pages/ProductDetails/ProductDetails.jsx:110. Empty means no variant.
-export const orders = [
-  {
-    customer: 'khach1@kicap.local',
-    daysAgo: 2,
-    status: 0,
-    paymentMethod: 'COD',
-    shippingPrice: 30000,
-    note: 'Giao giờ hành chính',
-    items: [{ product: 'AKKO 3068B Plus World Tour Tokyo', quantity: 1, variant: 'Loại switch/AKKO CS Jelly Purple' }],
-  },
-  {
-    customer: 'khach2@kicap.local',
-    daysAgo: 3,
-    status: 0,
-    paymentMethod: 'VNPAY',
-    shippingPrice: 30000,
-    note: '',
-    items: [
-      { product: 'Keycap AKKO Matcha Red Bean', quantity: 1, variant: '' },
-      { product: 'Dầu Lube Krytox 205g0 5ml', quantity: 2, variant: '' },
-    ],
-  },
-  {
-    customer: 'khach3@kicap.local',
-    daysAgo: 4,
-    status: 0,
-    paymentMethod: 'COD',
-    shippingPrice: 35000,
-    note: 'Gọi trước khi giao',
-    items: [{ product: 'Switch Gateron Yellow Pro (bộ 70)', quantity: 1, variant: 'Màu sắc/Vàng trong' }],
-  },
-  {
-    customer: 'khach4@kicap.local',
-    daysAgo: 5,
-    status: 0,
-    paymentMethod: 'COD',
-    shippingPrice: 35000,
-    note: '',
-    items: [
-      { product: 'Pad Lót Chuột Tròn Kicap Mini', quantity: 2, variant: '' },
-      { product: 'Hộp Đựng Switch 100 Ngăn', quantity: 1, variant: '' },
-    ],
-  },
-
-  {
-    customer: 'khach1@kicap.local',
-    daysAgo: 9,
-    status: 1,
-    paymentMethod: 'VNPAY',
-    shippingPrice: 30000,
-    note: '',
-    items: [{ product: 'Keychron K8 Pro Vỏ Nhôm', quantity: 1, variant: 'Loại switch/Gateron Baby Kangaroo' }],
-  },
-  {
-    customer: 'khach2@kicap.local',
-    daysAgo: 11,
-    status: 1,
-    paymentMethod: 'COD',
-    shippingPrice: 30000,
-    note: 'Để hàng ở lễ tân',
-    items: [
-      { product: 'Bộ Dụng Cụ Lube Switch 12 Món', quantity: 1, variant: '' },
-      { product: 'Foam Tiêu Âm Poron 3mm', quantity: 3, variant: '' },
-    ],
-  },
-  {
-    customer: 'khach3@kicap.local',
-    daysAgo: 13,
-    status: 1,
-    paymentMethod: 'COD',
-    shippingPrice: 35000,
-    note: '',
-    items: [{ product: 'Kê Tay Gỗ Cao Su TKL', quantity: 1, variant: 'Layout/TKL 36cm' }],
-  },
-  {
-    customer: 'khach4@kicap.local',
-    daysAgo: 15,
-    status: 1,
-    paymentMethod: 'VNPAY',
-    shippingPrice: 35000,
-    note: '',
-    items: [{ product: 'Keycap Royal Kludge XDA Pastel', quantity: 2, variant: '' }],
-  },
-
-  {
-    customer: 'khach1@kicap.local',
-    daysAgo: 21,
-    status: 2,
-    paymentMethod: 'COD',
-    shippingPrice: 30000,
-    note: '',
-    items: [
-      { product: 'Royal Kludge RK84 Pro', quantity: 1, variant: 'Loại switch/Gateron Yellow Pro' },
-      { product: 'Deskmat Kicap Matcha 800x300', quantity: 1, variant: '' },
-    ],
-  },
-  {
-    customer: 'khach2@kicap.local',
-    daysAgo: 24,
-    status: 2,
-    paymentMethod: 'VNPAY',
-    shippingPrice: 30000,
-    note: 'Giao cuối tuần',
-    items: [{ product: 'Switch Gateron Oil King (bộ 70)', quantity: 1, variant: '' }],
-  },
-  {
-    customer: 'khach3@kicap.local',
-    daysAgo: 27,
-    status: 2,
-    paymentMethod: 'COD',
-    shippingPrice: 35000,
-    note: '',
-    items: [{ product: 'FL Esports MK750 Ba Chế Độ', quantity: 1, variant: 'Loại switch/Kailh Box Jade' }],
-  },
-  {
-    customer: 'khach4@kicap.local',
-    daysAgo: 30,
-    status: 2,
-    paymentMethod: 'COD',
-    shippingPrice: 35000,
-    note: '',
-    items: [
-      { product: 'Bộ Stabilizer Durock V2 Plate Mount', quantity: 1, variant: '' },
-      { product: 'Cáp Xoắn Aviator USB-C Đen Bạc', quantity: 1, variant: '' },
-    ],
-  },
-
-  {
-    customer: 'khach1@kicap.local',
-    daysAgo: 40,
-    status: 3,
-    paymentMethod: 'VNPAY',
-    shippingPrice: 30000,
-    note: '',
-    items: [{ product: 'Keychron Q1 Pro QMK Bản Nhôm', quantity: 1, variant: '' }],
-  },
-  {
-    customer: 'khach2@kicap.local',
-    daysAgo: 52,
-    status: 3,
-    paymentMethod: 'COD',
-    shippingPrice: 30000,
-    note: '',
-    items: [
-      { product: 'Keycap AKKO MDA Wabi-Sabi', quantity: 1, variant: 'Màu sắc/Bản đầy đủ 229 phím' },
-      { product: 'Keycap AKKO Ocean Star Profile Cherry', quantity: 1, variant: '' },
-    ],
-  },
-  {
-    customer: 'khach3@kicap.local',
-    daysAgo: 63,
-    status: 3,
-    paymentMethod: 'VNPAY',
-    shippingPrice: 35000,
-    note: '',
-    items: [{ product: 'Leopold FC660M Bản Xám Than', quantity: 1, variant: '' }],
-  },
-  {
-    customer: 'khach4@kicap.local',
-    daysAgo: 78,
-    status: 3,
-    paymentMethod: 'COD',
-    shippingPrice: 35000,
-    note: 'Đã nhận, cảm ơn shop',
-    items: [
-      { product: 'Monsgeek M1W Bản Đặc Biệt', quantity: 1, variant: 'Loại switch/Gateron Oil King' },
-      { product: 'Kê Tay Gỗ Óc Chó Full-size', quantity: 1, variant: 'Layout/Full-size 44cm' },
-    ],
-  },
-  {
-    customer: 'khach1@kicap.local',
-    daysAgo: 95,
-    status: 3,
-    paymentMethod: 'VNPAY',
-    shippingPrice: 30000,
-    note: '',
-    items: [{ product: 'Switch AKKO CS Jelly Purple (bộ 45)', quantity: 2, variant: 'Màu sắc/Tím trong' }],
-  },
-  {
-    customer: 'khach2@kicap.local',
-    daysAgo: 112,
-    status: 3,
-    paymentMethod: 'COD',
-    shippingPrice: 30000,
-    note: '',
-    items: [
-      { product: 'Deskmat Kicap Tokyo Night 900x400', quantity: 1, variant: '' },
-      { product: 'Kê Tay Da PU Cho Layout 65%', quantity: 1, variant: '' },
-    ],
-  },
+const ORDER_NOTES = [
+  '',
+  'Giao giờ hành chính',
+  '',
+  'Gọi trước khi giao',
+  '',
+  'Để hàng ở lễ tân',
+  'Giao cuối tuần',
+  '',
 ];
+
+// Statuses 0-3 with ages that match: pending orders are days old, completed
+// ones months old, so the admin dashboard has a plausible history to chart.
+const ORDER_PLAN = [
+  { status: 0, count: 4, minDaysAgo: 1, maxDaysAgo: 6 },
+  { status: 1, count: 4, minDaysAgo: 8, maxDaysAgo: 18 },
+  { status: 2, count: 4, minDaysAgo: 20, maxDaysAgo: 34 },
+  { status: 3, count: 6, minDaysAgo: 38, maxDaysAgo: 120 },
+];
+
+const INNER_CITY_SHIPPING = 30000;
+const OUTER_CITY_SHIPPING = 35000;
+const INNER_CITIES = ['Hà Nội', 'TP. Hồ Chí Minh'];
+
+const variantsByProduct = variants.reduce((map, variant) => {
+  if (!map.has(variant.product)) map.set(variant.product, []);
+  map.get(variant.product).push(variant);
+  return map;
+}, new Map());
+
+const buildOrders = () => {
+  const random = createRandom(20260901);
+  const pick = (list) => list[Math.floor(random() * list.length)];
+  const customers = users.filter((user) => !user.isAdmin);
+  const result = [];
+  let index = 0;
+
+  for (const plan of ORDER_PLAN) {
+    for (let n = 0; n < plan.count; n += 1) {
+      const customer = customers[index % customers.length];
+      const itemCount = random() < 0.4 ? 2 : 1;
+      const chosen = new Set();
+      const items = [];
+
+      while (items.length < itemCount) {
+        const product = pick(products);
+        if (chosen.has(product.name)) continue;
+        chosen.add(product.name);
+
+        const variant = product.hasVariant ? pick(variantsByProduct.get(product.name)) : null;
+        items.push({
+          product: product.name,
+          quantity: random() < 0.75 ? 1 : 2,
+          variant: variant ? `${variant.name}/${variant.value}` : '',
+        });
+      }
+
+      result.push({
+        customer: customer.email,
+        daysAgo: plan.minDaysAgo + Math.floor(random() * (plan.maxDaysAgo - plan.minDaysAgo + 1)),
+        status: plan.status,
+        paymentMethod: index % 2 === 0 ? 'COD' : 'VNPAY',
+        shippingPrice: INNER_CITIES.includes(customer.province) ? INNER_CITY_SHIPPING : OUTER_CITY_SHIPPING,
+        note: ORDER_NOTES[index % ORDER_NOTES.length],
+        items,
+      });
+      index += 1;
+    }
+  }
+
+  return result;
+};
+
+export const orders = buildOrders();
 
 // Comment.user is a plain display-name string, not a reference (CommentModel.js).
-export const comments = [
-  {
-    product: 'AKKO 3068B Plus World Tour Tokyo',
-    user: 'Hoàng Long',
-    rating: 5,
-    content: 'Gõ êm, foam sẵn trong máy nên không bị vọng. Đáng tiền ở tầm giá này.',
-  },
-  {
-    product: 'AKKO 3068B Plus World Tour Tokyo',
-    user: 'Minh Tuấn',
-    rating: 4,
-    content: 'Keycap ASA hơi cao, quen tay mất khoảng hai ngày. Còn lại ổn.',
-  },
-  {
-    product: 'AKKO 3068B Plus World Tour Tokyo',
-    user: 'Thu Trang',
-    rating: 5,
-    content: 'Pin trâu, dùng cả tuần mới sạc lại. Màu sắc đúng như ảnh.',
-  },
-  {
-    product: 'AKKO MOD007B PC Hiệu Ứng Từ Trường',
-    user: 'Quốc Bảo',
-    rating: 5,
-    content: 'Chỉnh được hành trình kích hoạt, chơi game phản hồi nhanh hẳn.',
-  },
-  {
-    product: 'AKKO MOD007B PC Hiệu Ứng Từ Trường',
-    user: 'Đức Duy',
-    rating: 4,
-    content: 'Phần mềm hơi khó dùng lúc đầu nhưng phím thì rất tốt.',
-  },
-  {
-    product: 'Keychron K8 Pro Vỏ Nhôm',
-    user: 'Khánh Linh',
-    rating: 5,
-    content: 'Vỏ nhôm nặng, đặt bàn không xê dịch. QMK chỉnh thoải mái.',
-  },
-  {
-    product: 'Keychron K8 Pro Vỏ Nhôm',
-    user: 'Anh Khoa',
-    rating: 4,
-    content: 'Hơi nặng để mang đi làm, nhưng để cố định ở nhà thì tuyệt.',
-  },
-  {
-    product: 'Keychron K8 Pro Vỏ Nhôm',
-    user: 'Mai Anh',
-    rating: 5,
-    content: 'Hotswap dễ thao tác, đổi switch không cần hàn.',
-  },
-  {
-    product: 'Keychron V6 Max Có Núm Xoay',
-    user: 'Trọng Nghĩa',
-    rating: 4,
-    content: 'Núm xoay dùng sướng. Full-size hơi chiếm bàn.',
-  },
-  {
-    product: 'Keychron V6 Max Có Núm Xoay',
-    user: 'Hải Yến',
-    rating: 5,
-    content: 'Kết nối 2.4GHz ổn định, không thấy trễ khi làm việc.',
-  },
-  {
-    product: 'Keychron Q1 Pro QMK Bản Nhôm',
-    user: 'Hoàng Long',
-    rating: 5,
-    content: 'Hoàn thiện tốt nhất trong số phím mình từng mua. Gasket êm.',
-  },
-  {
-    product: 'Keychron Q1 Pro QMK Bản Nhôm',
-    user: 'Thanh Tùng',
-    rating: 4,
-    content: 'Giá cao nhưng xứng đáng nếu định dùng lâu dài.',
-  },
-  {
-    product: 'Leopold FC660M Bản Xám Than',
-    user: 'Đức Duy',
-    rating: 5,
-    content: 'Keycap PBT dày, gõ nhiều năm chắc vẫn chưa bóng.',
-  },
-  {
-    product: 'Leopold FC660M Bản Xám Than',
-    user: 'Ngọc Ánh',
-    rating: 4,
-    content: 'Không hotswap là điểm trừ duy nhất với mình.',
-  },
-  {
-    product: 'Leopold FC900R Bluetooth',
-    user: 'Quang Huy',
-    rating: 4,
-    content: 'Chuyển giữa hai máy nhanh, độ hoàn thiện đúng chuẩn Leopold.',
-  },
-  {
-    product: 'FL Esports MK750 Ba Chế Độ',
-    user: 'Khánh Linh',
-    rating: 5,
-    content: 'Tầm giá này mà có gasket với foam sẵn thì quá tốt.',
-  },
-  {
-    product: 'FL Esports MK750 Ba Chế Độ',
-    user: 'Bảo Ngọc',
-    rating: 4,
-    content: 'Đèn hơi chói vào ban đêm, phải giảm độ sáng.',
-  },
-  {
-    product: 'FL Esports MK750 Ba Chế Độ',
-    user: 'Trung Kiên',
-    rating: 5,
-    content: 'Mua làm phím đầu tiên, không phải mod gì thêm.',
-  },
-  {
-    product: 'FL Esports CMK87 Gasket',
-    user: 'Mai Anh',
-    rating: 4,
-    content: 'Vỏ nhựa nên nhẹ, nhưng âm gõ vẫn đầm nhờ foam.',
-  },
-  {
-    product: 'Royal Kludge RK84 Pro',
-    user: 'Hoàng Long',
-    rating: 4,
-    content: 'Ba chế độ tiện, chuyển máy nhanh. Núm xoay nhạy.',
-  },
-  {
-    product: 'Royal Kludge RK84 Pro',
-    user: 'Phương Thảo',
-    rating: 3,
-    content: 'Stab hơi rung ở phím Space, phải tự chỉnh lại.',
-  },
-  {
-    product: 'Royal Kludge R65 Từ Trường',
-    user: 'Đức Duy',
-    rating: 4,
-    content: 'Giá dưới một triệu mà có switch từ trường thì đáng thử.',
-  },
-  {
-    product: 'Monsgeek M1W Bản Đặc Biệt',
-    user: 'Quốc Bảo',
-    rating: 5,
-    content: 'Vỏ nhôm CNC đẹp, đóng hộp cẩn thận, phụ kiện đầy đủ.',
-  },
-  {
-    product: 'Monsgeek M1W Bản Đặc Biệt',
-    user: 'Thu Trang',
-    rating: 5,
-    content: 'Gõ ra âm trầm rất dễ chịu, không cần mod thêm.',
-  },
-  {
-    product: 'Keycap AKKO Black & Pink Profile ASA',
-    user: 'Khánh Linh',
-    rating: 5,
-    content: 'Màu lên đúng ảnh, đủ phím cho layout 65% của mình.',
-  },
-  {
-    product: 'Keycap AKKO Black & Pink Profile ASA',
-    user: 'Ngọc Ánh',
-    rating: 4,
-    content: 'Profile ASA cao hơn Cherry, cần thời gian làm quen.',
-  },
-  {
-    product: 'Keycap AKKO Matcha Red Bean',
-    user: 'Mai Anh',
-    rating: 5,
-    content: 'Tông xanh matcha nhìn dịu mắt, in dye-sub sắc nét.',
-  },
-  {
-    product: 'Keycap AKKO Matcha Red Bean',
-    user: 'Trung Kiên',
-    rating: 5,
-    content: 'Đủ phím phụ cho cả layout lẻ, không thiếu phím nào.',
-  },
-  {
-    product: 'Keycap AKKO Ocean Star Profile Cherry',
-    user: 'Hải Yến',
-    rating: 4,
-    content: 'Profile Cherry gõ thấp, thoải mái khi làm việc lâu.',
-  },
-  {
-    product: 'Keycap Monsgeek Cherry Trắng Xám',
-    user: 'Thanh Tùng',
-    rating: 4,
-    content: 'Tối giản, hợp bàn làm việc. Thành keycap dày chắc chắn.',
-  },
-  {
-    product: 'Keycap Monsgeek Cherry Trắng Xám',
-    user: 'Phương Thảo',
-    rating: 3,
-    content: 'Bản trắng xám hơi dễ bám bẩn, phải lau thường xuyên.',
-  },
-  {
-    product: 'Keycap Keychron OSA PBT Full Set',
-    user: 'Anh Khoa',
-    rating: 5,
-    content: 'Có sẵn cả phím Mac lẫn Windows, đổi máy không thiếu gì.',
-  },
-  {
-    product: 'Keycap FL Esports SA Sương Mai',
-    user: 'Bảo Ngọc',
-    rating: 4,
-    content: 'Profile SA cao, gõ vui tai nhưng nên dùng kèm kê tay.',
-  },
-  {
-    product: 'Keycap AKKO MDA Wabi-Sabi',
-    user: 'Quang Huy',
-    rating: 5,
-    content: 'Bộ này in năm mặt, nhìn góc nào cũng đẹp.',
-  },
-  {
-    product: 'Keycap AKKO MDA Wabi-Sabi',
-    user: 'Hoàng Long',
-    rating: 5,
-    content: 'Đắt hơn mặt bằng chung nhưng chất lượng in rất tốt.',
-  },
-  {
-    product: 'Keycap Royal Kludge XDA Pastel',
-    user: 'Thu Trang',
-    rating: 4,
-    content: 'Giá mềm, màu pastel dễ phối. XDA phẳng nên gõ đều tay.',
-  },
-  {
-    product: 'Switch Gateron Yellow Pro (bộ 70)',
-    user: 'Đức Duy',
-    rating: 5,
-    content: 'Lube sẵn từ nhà máy, lắp vào là mượt luôn, khỏi tự lube.',
-  },
-  {
-    product: 'Switch Gateron Yellow Pro (bộ 70)',
-    user: 'Trung Kiên',
-    rating: 5,
-    content: 'Giá tốt nhất trong nhóm linear mà mình từng dùng.',
-  },
-  {
-    product: 'Switch Gateron Yellow Pro (bộ 70)',
-    user: 'Ngọc Ánh',
-    rating: 4,
-    content: 'Vài con hơi lệch nhưng đa số đều tay.',
-  },
-  {
-    product: 'Switch Gateron Oil King (bộ 70)',
-    user: 'Quốc Bảo',
-    rating: 5,
-    content: 'Âm trầm và đầm, đúng như mô tả. Rất đáng tiền.',
-  },
-  {
-    product: 'Switch Gateron Oil King (bộ 70)',
-    user: 'Khánh Linh',
-    rating: 5,
-    content: 'Mượt hơn Yellow Pro rõ rệt, không cần lube thêm.',
-  },
-  {
-    product: 'Switch Gateron Baby Kangaroo (bộ 70)',
-    user: 'Mai Anh',
-    rating: 4,
-    content: 'Bump rõ ở đầu hành trình, gõ văn bản rất thích.',
-  },
-  {
-    product: 'Switch Kailh Box Jade (bộ 70)',
-    user: 'Thanh Tùng',
-    rating: 4,
-    content: 'Tiếng click to thật, không hợp dùng ở văn phòng chung.',
-  },
-  {
-    product: 'Switch Kailh Box Jade (bộ 70)',
-    user: 'Phương Thảo',
-    rating: 5,
-    content: 'Mình thích tiếng vang, con này đúng gu.',
-  },
-  {
-    product: 'Switch Kailh Box White V2 (bộ 70)',
-    user: 'Hải Yến',
-    rating: 4,
-    content: 'Nhẹ tay hơn Box Jade, tiếng click vẫn rõ.',
-  },
-  {
-    product: 'Switch AKKO CS Jelly Purple (bộ 45)',
-    user: 'Bảo Ngọc',
-    rating: 4,
-    content: 'Êm và nhẹ, gõ lâu không mỏi. Giá hợp lý.',
-  },
-  {
-    product: 'Switch AKKO CS Jelly Purple (bộ 45)',
-    user: 'Quang Huy',
-    rating: 4,
-    content: 'Bộ 45 con đủ cho layout 65% của mình.',
-  },
-  {
-    product: 'Switch AKKO CS Lavender Purple (bộ 45)',
-    user: 'Anh Khoa',
-    rating: 5,
-    content: 'Bump nhẹ vừa đủ, cân bằng tốt giữa êm và phản hồi.',
-  },
-  {
-    product: 'Switch Monsgeek Sunset Linear (bộ 70)',
-    user: 'Hoàng Long',
-    rating: 4,
-    content: 'Lò xo dài nên nhấn đều, âm thiên trầm dễ nghe.',
-  },
-  {
-    product: 'Cáp Xoắn Aviator USB-C Đen Bạc',
-    user: 'Thu Trang',
-    rating: 5,
-    content: 'Cáp chắc, đầu aviator tháo ra lắp vào nhẹ nhàng.',
-  },
-  {
-    product: 'Cáp Xoắn Aviator USB-C Đen Bạc',
-    user: 'Đức Duy',
-    rating: 4,
-    content: 'Đẹp, nhưng dây xoắn hơi ngắn nếu bàn sâu.',
-  },
-  {
-    product: 'Bộ Dụng Cụ Lube Switch 12 Món',
-    user: 'Trung Kiên',
-    rating: 5,
-    content: 'Đủ đồ cho lần build đầu, không phải mua lẻ thêm gì.',
-  },
-  {
-    product: 'Bộ Dụng Cụ Lube Switch 12 Món',
-    user: 'Ngọc Ánh',
-    rating: 4,
-    content: 'Cọ lube hơi to, nên mua thêm cọ nhỏ cho lò xo.',
-  },
-  {
-    product: 'Dầu Lube Krytox 205g0 5ml',
-    user: 'Quốc Bảo',
-    rating: 5,
-    content: 'Lube chuẩn cho linear, 5ml dùng được gần trăm con.',
-  },
-  {
-    product: 'Foam Tiêu Âm Poron 3mm',
-    user: 'Khánh Linh',
-    rating: 4,
-    content: 'Cắt sẵn theo layout nên lắp nhanh, giảm vọng rõ.',
-  },
-  {
-    product: 'Bộ Stabilizer Durock V2 Plate Mount',
-    user: 'Mai Anh',
-    rating: 5,
-    content: 'Đã cắt gọt sẵn, phím Space hết rung hẳn.',
-  },
-  {
-    product: 'Hộp Đựng Switch 100 Ngăn',
-    user: 'Thanh Tùng',
-    rating: 4,
-    content: 'Phân loại switch gọn gàng, nắp đóng chắc.',
-  },
-  {
-    product: 'Kê Tay Gỗ Óc Chó Full-size',
-    user: 'Phương Thảo',
-    rating: 5,
-    content: 'Vân gỗ đẹp, phủ dầu mịn tay, đế cao su bám bàn tốt.',
-  },
-  { product: 'Kê Tay Gỗ Cao Su TKL', user: 'Hải Yến', rating: 4, content: 'Giá mềm hơn óc chó mà hoàn thiện vẫn ổn.' },
-  {
-    product: 'Deskmat Kicap Tokyo Night 900x400',
-    user: 'Bảo Ngọc',
-    rating: 5,
-    content: 'Khổ lớn đủ để cả bàn phím và chuột, viền may chắc.',
-  },
+const REVIEWERS = [
+  'Hoàng Long',
+  'Minh Tuấn',
+  'Thu Trang',
+  'Quốc Bảo',
+  'Đức Duy',
+  'Khánh Linh',
+  'Anh Khoa',
+  'Mai Anh',
+  'Trọng Nghĩa',
+  'Hải Yến',
+  'Thanh Tùng',
+  'Ngọc Ánh',
+  'Quang Huy',
+  'Bảo Ngọc',
+  'Trung Kiên',
+  'Phương Thảo',
 ];
+
+// Per-category so a review never praises a feature the product cannot have.
+const REVIEW_POOL = {
+  [KEYBOARD]: [
+    'Gõ êm, có foam sẵn nên không bị vọng. Đáng tiền ở tầm giá này.',
+    'Hoàn thiện chắc tay, đặt bàn không xê dịch. Đóng gói cẩn thận.',
+    'Pin trâu, dùng cả tuần mới phải sạc lại. Kết nối ổn định.',
+    'Hotswap dễ thao tác, đổi switch không cần hàn.',
+    'Đèn hơi chói vào ban đêm, phải giảm độ sáng xuống.',
+    'Mua làm phím đầu tiên, không phải mod thêm gì cả.',
+    'Stab hơi rung ở phím Space, mình phải tự chỉnh lại.',
+    'Âm gõ trầm và đầm, đúng như mô tả trên shop.',
+  ],
+  [KEYCAP]: [
+    'Màu lên đúng ảnh, đủ phím cho layout 65% của mình.',
+    'In dye-sub sắc nét, thành keycap dày chắc chắn.',
+    'Đủ phím phụ cho cả layout lẻ, không thiếu phím nào.',
+    'Profile hơi cao so với Cherry, quen tay mất vài ngày.',
+    'Phối màu dịu mắt, hợp bàn làm việc văn phòng.',
+    'Giá mềm mà chất lượng in rất tốt, khó chê.',
+    'Bản màu sáng hơi dễ bám bẩn, phải lau thường xuyên.',
+    'Lắp vừa khít, không con nào bị rơ hay lỏng stem.',
+  ],
+  [SWITCH]: [
+    'Lube sẵn từ nhà máy, lắp vào là mượt luôn, khỏi tự lube.',
+    'Âm trầm và đầm, đúng như mô tả. Rất đáng tiền.',
+    'Bump rõ ở đầu hành trình, gõ văn bản rất thích.',
+    'Vài con hơi lệch nhưng đa số đều tay, chấp nhận được.',
+    'Nhẹ tay, gõ lâu không mỏi. Hợp làm việc cả ngày.',
+    'Tiếng click to thật, không hợp dùng ở văn phòng chung.',
+    'Lò xo dài nên nhấn đều, không bị hẫng cuối hành trình.',
+    'Giá tốt nhất trong nhóm mình từng thử qua.',
+  ],
+  [ACCESSORY]: [
+    'Đủ đồ cho lần build đầu, không phải mua lẻ thêm gì.',
+    'Hàng chắc chắn, hoàn thiện gọn gàng, giao nhanh.',
+    'Dùng đúng nhu cầu, giá hợp lý so với mặt bằng chung.',
+    'Lắp vào là thấy khác ngay, giảm tiếng vọng rõ rệt.',
+    'Đẹp nhưng hơi ngắn nếu bàn sâu, cân nhắc trước khi mua.',
+    'Shop tư vấn kỹ, hàng đúng mô tả.',
+  ],
+  [WRISTREST]: [
+    'Vân gỗ đẹp, phủ mịn tay, đế cao su bám bàn tốt.',
+    'Kê tay êm, gõ lâu đỡ mỏi cổ tay hẳn.',
+    'Kích thước vừa với bàn phím, cạnh bo tròn không cấn tay.',
+    'Hoàn thiện ổn so với giá, đóng gói kỹ.',
+  ],
+  [MOUSEPAD]: [
+    'Khổ lớn đủ để cả bàn phím và chuột, viền may chắc.',
+    'Mặt vải mịn, di chuột nhẹ và đều tay.',
+    'Đế cao su bám tốt, dùng vài tháng chưa thấy bong mép.',
+    'Màu in đúng ảnh, không bị lệch tông.',
+  ],
+};
+
+const buildComments = () => {
+  const random = createRandom(19112026);
+  const result = [];
+
+  products.forEach((product, index) => {
+    // Roughly a third of the catalogue stays unreviewed, like a real storefront.
+    if (random() < 0.3) return;
+
+    const pool = REVIEW_POOL[product.category];
+    const count = random() < 0.45 ? 2 : 1;
+
+    for (let n = 0; n < count; n += 1) {
+      result.push({
+        product: product.name,
+        user: REVIEWERS[(index * 3 + n * 7) % REVIEWERS.length],
+        rating: random() < 0.62 ? 5 : random() < 0.75 ? 4 : 3,
+        content: pool[(index * 2 + n * 5) % pool.length],
+      });
+    }
+  });
+
+  return result;
+};
+
+export const comments = buildComments();

@@ -15,8 +15,12 @@ import {
   users,
   variants,
 } from './seed-data.js';
+import { htmlToText, summarise } from './fetch-kicap.js';
 
 const duplicates = (values) => values.filter((v, i) => values.indexOf(v) !== i);
+
+// Every catalogue image is hotlinked from the kicap.vn storefront CDN.
+const STOREFRONT_IMAGE = /^https:\/\/bizweb\.dktcdn\.net\//;
 
 describe('placeholderImage', () => {
   it('transliterates Vietnamese to ASCII and percent-encodes the label', () => {
@@ -42,8 +46,8 @@ describe('categories', () => {
     assert.deepEqual(duplicates(categories.map((c) => c.categoryName)), []);
   });
 
-  it('gives every category an image', () => {
-    for (const c of categories) assert.match(c.image, /^https:\/\/placehold\.co\//);
+  it('gives every category a storefront image', () => {
+    for (const c of categories) assert.match(c.image, STOREFRONT_IMAGE);
   });
 });
 
@@ -105,8 +109,11 @@ describe('shippers', () => {
 });
 
 describe('products', () => {
-  it('has 40 entries with unique names and unique SKUs', () => {
-    assert.equal(products.length, 40);
+  // The exact count follows CATEGORY_QUOTAS and the committed snapshot; the band
+  // is wide enough to survive `npm run fetch:kicap` but still catches a
+  // derivation that silently drops or duplicates categories.
+  it('has a full catalogue with unique names and unique SKUs', () => {
+    assert.ok(products.length >= 60 && products.length <= 90, `unexpected catalogue size ${products.length}`);
     // ProductModel declares name unique; SKU is not unique in the schema but
     // duplicates make the sample data misleading.
     assert.deepEqual(duplicates(products.map((p) => p.name)), []);
@@ -137,16 +144,39 @@ describe('products', () => {
   it('keeps price, discount and stock in valid ranges', () => {
     for (const p of products) {
       assert.ok(p.price > 0, `${p.name} has non-positive price`);
-      assert.ok(p.discount >= 0 && p.discount <= 50, `${p.name} has discount ${p.discount}`);
+      assert.ok(p.discount >= 0 && p.discount <= 70, `${p.name} has discount ${p.discount}`);
       assert.ok(p.stock > 0, `${p.name} has no stock`);
     }
+  });
+
+  // ProductModel requires image; seed.js reads images[0] and images[1].
+  it('gives every product at least one storefront image', () => {
+    for (const p of products) {
+      assert.ok(p.images.length >= 1, `${p.name} has no image`);
+      for (const image of p.images) assert.match(image, STOREFRONT_IMAGE);
+    }
+  });
+
+  it('gives every product a non-empty description', () => {
+    for (const p of products) assert.ok(p.description.length > 0, `${p.name} has no description`);
   });
 });
 
 describe('variants', () => {
-  it('has 30 entries with unique SKUs', () => {
-    assert.equal(variants.length, 30);
+  it('has unique SKUs', () => {
+    assert.ok(variants.length > 0);
+    // VariantModel does not declare sku unique, but duplicates make the admin
+    // variant list ambiguous.
     assert.deepEqual(duplicates(variants.map((v) => v.sku)), []);
+  });
+
+  it('never repeats a value within one product', () => {
+    const seen = new Set();
+    for (const v of variants) {
+      const key = `${v.product}|${v.value}`;
+      assert.ok(!seen.has(key), `${v.product} has two variants named ${v.value}`);
+      seen.add(key);
+    }
   });
 
   it('attaches only to products flagged hasVariant', () => {
@@ -160,6 +190,15 @@ describe('variants', () => {
     for (const p of products.filter((x) => x.hasVariant)) {
       const count = variants.filter((v) => v.product === p.name).length;
       assert.ok(count >= 2, `${p.name} has only ${count} variants`);
+    }
+  });
+
+  // seed.js and ProductDetails.jsx:110 encode a variant as `${name}/${value}`
+  // and split on the slash, so a slash inside either half loses the value.
+  it('keeps slashes out of attribute names and variant values', () => {
+    for (const v of variants) {
+      assert.ok(!v.name.includes('/'), `attribute "${v.name}" contains a slash`);
+      assert.ok(!v.value.includes('/'), `variant value "${v.value}" contains a slash`);
     }
   });
 
@@ -179,9 +218,10 @@ describe('variants', () => {
 });
 
 describe('sliders', () => {
-  it('has 4 entries with unique displayOrder values', () => {
+  it('has 4 entries with unique displayOrder values and a storefront image', () => {
     assert.equal(sliders.length, 4);
     assert.deepEqual(duplicates(sliders.map((s) => s.displayOrder)), []);
+    for (const s of sliders) assert.match(s.image, STOREFRONT_IMAGE);
   });
 });
 
@@ -273,8 +313,8 @@ describe('orders', () => {
 });
 
 describe('comments', () => {
-  it('has 60 comments rated 3 to 5 on seeded products', () => {
-    assert.equal(comments.length, 60);
+  it('has comments rated 3 to 5 on seeded products', () => {
+    assert.ok(comments.length >= 40, `only ${comments.length} comments`);
     const names = products.map((p) => p.name);
     for (const c of comments) {
       assert.ok(names.includes(c.product), `comment on unknown product ${c.product}`);
@@ -286,5 +326,23 @@ describe('comments', () => {
 
   it('spreads across at least 15 distinct products', () => {
     assert.ok(new Set(comments.map((c) => c.product)).size >= 15);
+  });
+});
+
+describe('fetch-kicap helpers', () => {
+  it('strips markup, inline styles and comments out of Bizweb content', () => {
+    const html = '<!-- note --><style>.a{color:red}</style><p>Bàn ph&iacute;m</p><b>c&#39;m</b>';
+    assert.equal(htmlToText(html), "Bàn ph&iacute;m c'm");
+  });
+
+  it('leaves a short description untouched', () => {
+    assert.equal(summarise('<p>Keycap PBT dye-sub.</p>'), 'Keycap PBT dye-sub.');
+  });
+
+  it('cuts a long description at a sentence boundary, never mid-word', () => {
+    const long = `<p>${'Câu mẫu về bàn phím cơ. '.repeat(40)}</p>`;
+    const result = summarise(long);
+    assert.ok(result.length <= 281, `summary is ${result.length} chars`);
+    assert.ok(/[.…]$/.test(result), `summary ends with "${result.slice(-12)}"`);
   });
 });

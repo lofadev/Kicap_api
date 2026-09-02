@@ -10,6 +10,7 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "seed": "node scripts/seed.js",
+    "fetch:kicap": "node scripts/fetch-kicap.js",
     "test": "node --test"
   },
   "dependencies": {

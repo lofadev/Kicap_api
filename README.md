@@ -64,7 +64,7 @@ curl http://localhost:3000/
 
 ## Seeding the database
 
-`scripts/seed.js` fills all 14 collections with coherent Vietnamese sample data — a 40-product catalogue with variants and galleries, plus users, orders, order details and product reviews.
+`scripts/seed.js` fills all 14 collections with a real catalogue taken from the kicap.vn storefront — 81 products with their real names, prices, brands, variants and images — plus users, orders, order details and product reviews.
 
 ```bash
 npm run seed            # prints what it will delete, then asks for confirmation
@@ -77,13 +77,21 @@ Expected result:
 
 | Collection | Count | | Collection | Count |
 | --- | --- | --- | --- | --- |
-| Province | 34 | | Product | 40 |
-| OrderStatus | 5 | | Variant | 30 |
-| Shipper | 3 | | ProductImage | 120 |
-| Attribute | 3 | | Slider | 4 |
+| Province | 34 | | Product | 81 |
+| OrderStatus | 5 | | Variant | 273 |
+| Shipper | 3 | | ProductImage | 242 |
+| Attribute | 11 | | Slider | 4 |
 | Category | 6 | | Order | 18 |
-| Supplier | 4 | | OrderDetail | 26 |
-| User | 5 | | Comment | 60 |
+| Supplier | 4 | | OrderDetail | 22 |
+| User | 5 | | Comment | 81 |
+
+### Refreshing the catalogue
+
+```bash
+npm run fetch:kicap
+```
+
+Downloads `https://kicap.vn/collections/all/products.json` into `scripts/kicap-catalog.json`, which is committed to the repo. `npm run seed` reads only that file, so seeding works offline and produces the same database every time. Re-run the fetch when the catalogue should be refreshed; the counts above will shift with it.
 
 ### Seeded accounts
 
@@ -96,12 +104,14 @@ All seeded accounts have `isVerify: true`, so they can log in without a configur
 
 ### Sample data notes
 
-- Product and slider images are `placehold.co` URLs, so seeding needs no Firebase credentials. Rendering them needs an internet connection.
-- Brand names refer to real manufacturers descriptively. Product names, descriptions and reviews were written for this project.
+- Product, category and slider images are the storefront's own `bizweb.dktcdn.net` URLs, hotlinked rather than copied. `Product.image` is a plain string, so they sit alongside the Firebase download URLs the admin upload form writes — seeding still needs no Firebase credentials, only an internet connection to render.
+- Products are picked per category by quota, preferring items that are in stock, have a full gallery and have real variants. Artisan keycaps, monitors and headphones are filtered out; the six seeded categories are the ones the client expects.
+- Prices, discounts, SKUs, brands, descriptions and variants are the storefront's real values. **Stock is not**: only a quarter of the live catalogue is in stock, so anything at zero gets a deterministic 5–30 instead.
+- Suppliers, users, orders and reviews are written for this project — kicap.vn publishes none of them. Orders and reviews are generated from a fixed-seed PRNG, so two seeds of the same snapshot produce identical data.
 - Orders are spread over the last four months and cover every stage of the order flow. `createdAt` is set explicitly rather than left to `timestamps: true`, otherwise the admin date-range filter would see every order as created today.
 - `Product.rating` is recomputed from the seeded comments at the end of the run.
 
-`scripts/seed-data.js` holds the data and nothing else — no database access — so `scripts/seed-data.test.js` can assert against it without a running Mongo.
+`scripts/seed-data.js` derives everything from the snapshot and touches no database, so `scripts/seed-data.test.js` can assert against it without a running Mongo.
 
 ## Tests
 
@@ -117,8 +127,10 @@ Runs `node --test`. The suite covers the referential invariants the client silen
 index.js              Entry point: dotenv, mongoose.connect, middleware, routes
 vercel.json           Serverless deployment config
 scripts/
+  fetch-kicap.js      Downloads the kicap.vn catalogue into kicap-catalog.json
+  kicap-catalog.json  Committed catalogue snapshot (437 products)
   seed.js             Seed orchestration
-  seed-data.js        Static sample data
+  seed-data.js        Seed data derived from the snapshot
   seed-data.test.js   Invariant tests over seed-data.js
 src/
   routes/             Express routers, one per resource; index.js mounts them under /api
